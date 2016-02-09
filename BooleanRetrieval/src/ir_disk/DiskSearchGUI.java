@@ -226,7 +226,7 @@ public class DiskSearchGUI extends JFrame {
 							    	buf.append( "" + pe.docID );
 							    }
 							    else {
-							    	buf.append( filename );
+							    	buf.append("docid: " + pe.docID + ",filename: " + filename );
 							    }
 							    if ( queryType == Index.RANKED_QUERY ) {
 							    	buf.append( "   " + String.format( "%.5f", pe.score )); 

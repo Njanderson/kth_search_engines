@@ -24,6 +24,12 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
     	this.offsets = new LinkedList<Integer>();
     	this.score = 0;
     }
+    
+    private PostingsEntry(int docID, List<Integer> offsets, double score) {
+    	this.docID = docID;
+    	this.offsets = offsets;
+    	this.score = score;
+    }
 
     /**
      *  PostingsEntries are compared by their score (only relevant 
@@ -57,13 +63,32 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
 			return false;
 		return true;
 	}
+	
+	public PostingsEntry clone() {
+		LinkedList<Integer> offsetsCopy = new LinkedList<Integer>();
+		for (Integer offset: offsets) {
+			offsetsCopy.add(offset);
+		}
+		return new PostingsEntry(docID, offsetsCopy, score);
+	}
 
 	public void addOffset(int offset) {
 		offsets.add(offset);
 	}
 
 	public void addList(PostingsEntry newList) {
-		offsets.addAll((LinkedList<Integer>)newList.offsets);
+		for (Integer offset: newList.offsets) {
+			if (offsets.contains(offset)) {
+				try {
+					throw new Exception();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					System.exit(1);
+				}
+			}
+			addOffset(offset);
+		}
 	}    
 
     //

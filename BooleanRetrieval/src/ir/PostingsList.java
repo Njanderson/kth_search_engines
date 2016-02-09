@@ -55,7 +55,7 @@ public class PostingsList implements Serializable {
     
     /** Gets the PostingsEntry for a docID */
     public PostingsEntry get(int docID) {
-    	return docIDtoPostings.get(docID);
+    	return docIDtoPostings.get(docID).clone();
     }
     
     /** Removes a docID */
@@ -79,11 +79,15 @@ public class PostingsList implements Serializable {
     /**  Adds a PostingsEntry for a token */
     public void putList(int docID, PostingsEntry newList) {
     	if (!docIDtoPostings.containsKey(docID)) {
-    		docIDtoPostings.put(docID, newList);
+    		docIDtoPostings.put(docID, newList.clone());
     	} else {
     		docIDtoPostings.get(docID).addList(newList);
     	}    	
     }
+
+	public boolean isEmpty() {
+		return docIDtoPostings.isEmpty();
+	}
     
     //
     //  YOUR CODE HERE

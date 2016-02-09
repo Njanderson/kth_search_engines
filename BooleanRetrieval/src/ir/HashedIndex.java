@@ -15,7 +15,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import ir.PostingsList;
@@ -76,110 +78,107 @@ public class HashedIndex implements Index {
 	//
     	LinkedList<String> queryTerms = query.getQueryTerms();
     	if (queryType == Index.PHRASE_QUERY) {
-//    		Map<String, PostingsList> resultsMap = new HashMap<String, PostingsList>();
-//        	PostingsList resultsList = index.get(queryTerms.get(0)).clone();
-//        	resultsMap.put(queryTerms.get(0), resultsList);
-//        	for (int i = 1; i < queryTerms.size(); i++) {
-//        		String queryTerm = queryTerms.get(i);
-//        		if (!resultsMap.containsKey(queryTerm)) {
-//        			PostingsList res = index.get(queryTerm).clone();
-//            		resultsMap.put(queryTerm, res);
-//        			resultsList.intersect(res);
-//        		}
-//        	}
-//        	Set<Integer> docsToRemove = new HashSet<Integer>();
-//        	for (Integer docID: resultsList.getDocIDs()) {
-//        		boolean toAdd = false;
-//        		String startToken = queryTerms.get(0);
-//        		PostingsEntry pe = resultsMap.get(startToken).get(docID); // all occurrences of a query word in a document
-//        		for (int i = 0; i < pe.offsets.size() && !toAdd; i++) {
-//        			Integer startOffset = pe.offsets.get(i);
-//					boolean isValid = true;
-//        			for (int j = 1; j < queryTerms.size() && isValid; j++) {
-//        				String targetToken = queryTerms.get(j);
-//                		PostingsEntry nextTermEntries = resultsMap.get(targetToken).get(docID); // all occurrences of a query word in a document
-//                		isValid = nextTermEntries.offsets.contains(startOffset + j);
-//        			}
-//        			if (isValid) {
-//        				toAdd = true;
-//        			}
-//        		}
-//        		if (!toAdd) {
-//        			docsToRemove.add(docID);
-//        		}
-//        	}
-//        	for (Integer docID: docsToRemove) {
-//    			resultsList.removeDocId(docID);
-//        	}
-//        	return resultsList;
-    		return null;
+    		
+    		// get basic intersection to limit possible documents
+    		PostingsList retList = index.get(queryTerms.get(0));
+    		if (queryTerms.size() > 1) {
+    			retList = intersectPostingsLists(false, retList, index.get(queryTerms.get(1)));
+    			for (int queryTermIndex = 2; queryTermIndex < queryTerms.size() && !retList.isEmpty(); queryTermIndex++) {
+    				retList = intersectPostingsLists(false, retList, index.get(queryTerms.get(queryTermIndex)));
+    			}
+    		}
+    		
+    		Iterator<Integer> docIter = retList.docIDtoPostings.keySet().iterator();
+    		while (docIter.hasNext()) {
+    			Integer docId = docIter.next();
+    			ListIterator<Integer>[] positionIterators = new ListIterator[queryTerms.size()];
+    			for (int queryTermIndex = 0; queryTermIndex < queryTerms.size(); queryTermIndex++) {
+    				positionIterators[queryTermIndex] = index.get(queryTerms.get(queryTermIndex)).get(docId).offsets.listIterator();
+    			}
+    			int queryWordIndex = 0;
+				int currPosition = positionIterators[queryWordIndex].next();
+				try {
+					while (queryWordIndex < positionIterators.length - 1) {
+						queryWordIndex++;
+	    				currPosition++;
+	    				int nextPosition = positionIterators[queryWordIndex].next();
+	    				while (currPosition > nextPosition) {
+	    					nextPosition = positionIterators[queryWordIndex].next();
+	    				}
+	    				if (currPosition != nextPosition) {
+	    					positionIterators[queryWordIndex].previous();
+	    					queryWordIndex = 0;
+	    					currPosition = positionIterators[queryWordIndex].next();
+	    				}
+	    			}
+				} catch (NoSuchElementException notFound) {
+					docIter.remove();
+				}
+    		}
+    		return retList;
     	} else {
     		PostingsList retList = index.get(queryTerms.get(0));
-        	// TreeMap's keys will be returned in sorted order        	
-        	for (int queryTermIndex = 1; queryTermIndex < queryTerms.size(); queryTermIndex++) {
-        		PostingsList tempList = new PostingsList();
-        		Iterator<Integer> firIter = retList.docIDtoPostings.keySet().iterator();
-        		
-        		int hold = firIter.next().intValue();
-        		do {
-        			Integer temp = firIter.next().intValue();
-        			if (temp <= hold) {
-        				System.exit(1);
-        			}
-        			hold = temp;
-        		} while (firIter.hasNext());
-        		
-        		firIter = retList.docIDtoPostings.keySet().iterator();
-        		
-            	PostingsList secList = index.get(queryTerms.get(queryTermIndex));
-            	Iterator<Integer> secIter = secList.docIDtoPostings.keySet().iterator();
-            	
-            	hold = secIter.next().intValue();
-        		do {
-        			Integer temp = secIter.next().intValue();
-        			if (temp <= hold) {
-        				System.exit(1);
-        			}
-        			hold = temp;
-        		} while (secIter.hasNext());
-        		
-        		
-        		secIter = secList.docIDtoPostings.keySet().iterator();
-            	
-            	if (firIter.hasNext() && secIter.hasNext()) {
-            		int firDocId = firIter.next().intValue();
-            		int secDocId = secIter.next().intValue();
-                	while (firIter.hasNext() && secIter.hasNext()) {
-                		while (firDocId > secDocId) {
-                			// look for the firDocId in secList, stopping when we are on or past it
-                			secDocId = secIter.next().intValue();
-                		}
-                		
-                		if (secDocId == firDocId) {
-                			// found in second list
-                			if (queryTermIndex == 1) {
-                				// due to fence post solution, during the first comparison,
-                				// we want to add the positions from the first list we use to compare
-                				// before we have the first result from our intersection
-                    			tempList.putList(firDocId, retList.get(firDocId));
-                			}
-                			tempList.putList(secDocId, secList.get(secDocId));
-                		}
-                		
-                		while (secDocId >=  firDocId) {
-                			// we move on as far as we can to catch up if we need to
-                			firDocId = firIter.next().intValue();
-                		}                		
-                	}
-                	retList = tempList;
-            	} else {
-            		return new PostingsList();
-            	}
-
-        	}
-        	return retList;
+    		if (queryTerms.size() > 1) {
+    			retList = intersectPostingsLists(true, retList, index.get(queryTerms.get(1)));
+    			for (int queryTermIndex = 2; queryTermIndex < queryTerms.size() && !retList.isEmpty(); queryTermIndex++) {
+    				retList = intersectPostingsLists(false, retList, index.get(queryTerms.get(queryTermIndex)));
+    			}
+    		}
+    		return retList;
     	}    	
     }
+
+	public PostingsList intersectPostingsLists(boolean includeFirst, PostingsList firList, PostingsList secList) {
+    	PostingsList resList = new PostingsList();
+    	Iterator<Integer> firIter = firList.docIDtoPostings.keySet().iterator();	
+    	Iterator<Integer> secIter = secList.docIDtoPostings.keySet().iterator();      		
+		secIter = secList.docIDtoPostings.keySet().iterator();
+		if (firIter.hasNext() && secIter.hasNext()) {
+			Integer firDocId = firIter.next();
+    		Integer secDocId = secIter.next();
+			while (firIter.hasNext() && secIter.hasNext()) {
+	    		while (firDocId.compareTo(secDocId) > 0 && secIter.hasNext()) {
+	    			// look for the firDocId in secList, stopping when we are on or past it
+	    			secDocId = secIter.next();
+	    		}
+	    		if (secDocId.equals(firDocId)) {
+	    			if (includeFirst) {
+	        			resList.putList(firDocId, firList.get(firDocId));
+	    			}
+	    			resList.putList(secDocId, secList.get(secDocId));
+	    			if (firIter.hasNext())
+	    				firDocId = firIter.next();
+	    		}
+	    		while (secDocId.compareTo(firDocId) > 0  && firIter.hasNext()) {
+	    			// we move on as far as we can to catch up if we need to
+	    			firDocId = firIter.next();
+	    		}                		
+	    	}
+			
+			//check for end matches we may have missed
+        	while (firDocId.compareTo(secDocId) > 0) {
+    			// look for the firDocId in secList, stopping when we are on or past it
+    			secDocId = secIter.next();
+    		}
+        	
+        	// final check if they are matching on the last 
+        	if (secDocId.equals(firDocId)) {
+    			// found in second list
+    			if (includeFirst) {
+    				// due to fence post solution, during the first comparison,
+    				// we want to add the positions from the first list we use to compare
+    				// before we have the first result from our intersection
+    				resList.putList(firDocId, firList.get(firDocId));
+    			}
+    			resList.putList(secDocId, secList.get(secDocId));
+    		}
+			
+	    	return resList;
+		} else {
+			return new PostingsList();
+		}
+    }
+    
 
 
     /**
