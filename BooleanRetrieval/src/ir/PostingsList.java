@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  *   A list of postings for a given word.
@@ -19,13 +20,13 @@ import java.util.Set;
 public class PostingsList implements Serializable {
     
     /** The postings list as a linked list. */
-    private HashMap<Integer, PostingsEntry> docIDtoPostings;
+    TreeMap<Integer, PostingsEntry> docIDtoPostings;
 
     public PostingsList() {
-    	docIDtoPostings = new HashMap<Integer, PostingsEntry>();
+    	docIDtoPostings = new TreeMap<Integer, PostingsEntry>();
     }
     
-    private PostingsList(HashMap<Integer, PostingsEntry> backingList) {
+    private PostingsList(TreeMap<Integer, PostingsEntry> backingList) {
     	docIDtoPostings = backingList;
     }
     
@@ -72,7 +73,16 @@ public class PostingsList implements Serializable {
     
     /** Clones a PostingsList as not to disrupt the current dictionary */ 
     public PostingsList clone() {
-    	return new PostingsList((HashMap<Integer, PostingsEntry>)docIDtoPostings.clone());
+    	return new PostingsList((TreeMap<Integer, PostingsEntry>)docIDtoPostings.clone());
+    }
+
+    /**  Adds a PostingsEntry for a token */
+    public void putList(int docID, PostingsEntry newList) {
+    	if (!docIDtoPostings.containsKey(docID)) {
+    		docIDtoPostings.put(docID, newList);
+    	} else {
+    		docIDtoPostings.get(docID).addList(newList);
+    	}    	
     }
     
     //

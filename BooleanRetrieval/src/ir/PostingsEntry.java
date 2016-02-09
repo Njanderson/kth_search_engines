@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
+
 public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
     
     public int docID;
@@ -60,7 +61,10 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
 	public void addOffset(int offset) {
 		offsets.add(offset);
 	}
-    
+
+	public void addList(PostingsEntry newList) {
+		offsets.addAll((LinkedList<Integer>)newList.offsets);
+	}    
 
     //
     //  YOUR CODE HERE

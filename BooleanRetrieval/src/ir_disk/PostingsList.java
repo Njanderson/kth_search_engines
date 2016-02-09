@@ -12,20 +12,21 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  *   A list of postings for a given word.
  */
 public class PostingsList implements Serializable {
     
-    /** The postings list as a linked list. */
-    private HashMap<Integer, PostingsEntry> docIDtoPostings;
+    /** The postings list as a hash map. */
+    private TreeMap<Integer, PostingsEntry> docIDtoPostings;
 
     public PostingsList() {
-    	docIDtoPostings = new HashMap<Integer, PostingsEntry>();
+    	docIDtoPostings = new TreeMap<Integer, PostingsEntry>();
     }
     
-    private PostingsList(HashMap<Integer, PostingsEntry> backingList) {
+    private PostingsList(TreeMap<Integer, PostingsEntry> backingList) {
     	docIDtoPostings = backingList;
     }
     
@@ -64,15 +65,22 @@ public class PostingsList implements Serializable {
     
     /** Intersects two PostingsLists, use a clone unless you want keys removed permanently */
     public void intersect(PostingsList other) {
-    	if (other != null)
-    		docIDtoPostings.keySet().retainAll(other.docIDtoPostings.keySet());
-    	else 
-    		docIDtoPostings.clear();
+    	// TreeSet's keys will be returned in sorted order
+    	Iterator<Integer> thisDocIds = docIDtoPostings.keySet().iterator();
+    	Iterator<Integer> otherDocIds = other.docIDtoPostings.keySet().iterator();
+    	thisDocIds.next();
+    	otherDocIds.next();
+    	while (thisDocIds.hasNext()) {
+    		if (other != null)
+        		docIDtoPostings.keySet().retainAll(other.docIDtoPostings.keySet());
+        	else 
+        		docIDtoPostings.clear();
+    	}
     }
     
     /** Clones a PostingsList as not to disrupt the current dictionary */ 
     public PostingsList clone() {
-    	return new PostingsList((HashMap<Integer, PostingsEntry>)docIDtoPostings.clone());
+    	return new PostingsList((TreeMap<Integer, PostingsEntry>)docIDtoPostings.clone());
     }
     
     //
