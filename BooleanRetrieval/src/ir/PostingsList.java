@@ -9,10 +9,14 @@
 package ir;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.TreeMap;
+
 
 /**
  *   A list of postings for a given word.
@@ -30,9 +34,14 @@ public class PostingsList implements Serializable {
     	docIDtoPostings = backingList;
     }
     
-    /**  Number of postings in this list  */
-    public int size() {
+    /**  Number of docIds (keys) in this tree map */
+    public int docOccurrenceSize() {
     	return docIDtoPostings.size();
+    }
+    
+    /**  Number of occurrences of this word */
+    public int size() {
+    	return docIDtoPostings.values().size();
     }
 
     /**  Returns an iterator over the PostingsEntrys */
@@ -40,9 +49,25 @@ public class PostingsList implements Serializable {
     	return docIDtoPostings.values().iterator();
     }
     
+    /**  Returns an iterator over the PostingsEntrys */
+    public Iterator<PostingsEntry> getScoreSortedIterator() {
+    	PostingsEntry[] entries = new PostingsEntry[size()];
+    	docIDtoPostings.values().toArray(entries);
+        Arrays.sort(entries, new PostingsEntryScoreComparator());
+        List<PostingsEntry> entriesList = Arrays.asList(entries);
+        return entriesList.iterator();
+    }
+    
     /**  Returns the docIDs of postings */
     public Set<Integer> getDocIDs() {
     	return docIDtoPostings.keySet();
+    }
+    
+    /**  Adds a PostingsEntry for a token without adding an offset */
+    public void put(int docID) {
+    	if (!docIDtoPostings.containsKey(docID)) {
+        	docIDtoPostings.put(docID, new PostingsEntry(docID));
+    	}
     }
     
     /**  Adds a PostingsEntry for a token */
@@ -55,7 +80,7 @@ public class PostingsList implements Serializable {
     
     /** Gets the PostingsEntry for a docID */
     public PostingsEntry get(int docID) {
-    	return docIDtoPostings.get(docID).clone();
+    	return docIDtoPostings.get(docID);
     }
     
     /** Removes a docID */
@@ -89,9 +114,17 @@ public class PostingsList implements Serializable {
 		return docIDtoPostings.isEmpty();
 	}
     
-    //
-    //  YOUR CODE HERE
-    //
+    public boolean containsDocId(int docID) {
+    	return docIDtoPostings.containsKey(docID);
+    }
+    
+    public class PostingsEntryScoreComparator implements Comparator<PostingsEntry> {
+        @Override
+        public int compare(PostingsEntry fir, PostingsEntry sec) {
+            return (new Double(sec.score)).compareTo(new Double(fir.score));
+        }
+    }
+    
 }
 	
 

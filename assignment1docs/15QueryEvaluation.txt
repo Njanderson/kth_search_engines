@@ -1,0 +1,11 @@
+QUERY_ID = 2, DOC_ID = , RELEVANCE_SCORE = 
+QUERY_ID = 2, DOC_ID = Evelyn_Silvia, RELEVANCE_SCORE = 1
+QUERY_ID = 2, DOC_ID = Events_Calendars, RELEVANCE_SCORE = 0
+QUERY_ID = 2, DOC_ID = Mathematics, RELEVANCE_SCORE = 3
+QUERY_ID = 2, DOC_ID = MattHh, RELEVANCE_SCORE = 0
+QUERY_ID = 2, DOC_ID = Statistics, RELEVANCE_SCORE = 2
+QUERY_ID = 2, DOC_ID = Private_Tutoring, RELEVANCE_SCORE = 0
+QUERY_ID = 2, DOC_ID = Quantitative_Biology_and_Bioinformatics, RELEVANCE_SCORE = 1
+QUERY_ID = 2, DOC_ID = What_I_Wish_I_Knew...Before_Coming_to_UC_Davis_Entomology, RELEVANCE_SCORE = 2
+QUERY_ID = 2, DOC_ID = Graduate_Groups, RELEVANCE_SCORE = 2
+QUERY_ID = 2, DOC_ID = Computer_Science, RELEVANCE_SCORE = 1

@@ -1,0 +1,37 @@
+Nick Anderson, nja4@uw.edu
+1. graduate mathematics program math
+	-added math because longer discussions about mathematics will likely shorten to math somewhere
+2. graduate mathematics program math school
+	-added school, which removed the ECE_Course_Reviews match, but removed Graduate_Groups, which contains some relevant content
+3. graduate mathematics math school
+	-removing program, which doesn't seem semantically very meaningful did not add back in Graduate_Groups, but added irrelevant matches like Weeder_Classes.
+4. graduate mathematics research math
+	-added back in Graduate_Groups, but still have some personal pages that seem less relevant like Linda_Katehi's.
+5. graduate mathematics math research program
+	-adding back in program got rid of Linda_Katehi but retained Graduate_Groups, and almost all pages are related in some way, as many will want to learn about related graduate programs in Statistics and Computer Science. 
+
+
+Final results:
+
+Found 10 matching document(s)
+
+ 0. src\resources\davisWiki\Evelyn_Silvia.f
+ 1. src\resources\davisWiki\Events_Calendars.f
+ 2. src\resources\davisWiki\Mathematics.f
+ 3. src\resources\davisWiki\MattHh.f
+ 4. src\resources\davisWiki\Statistics.f
+ 5. src\resources\davisWiki\Private_Tutoring.f
+ 6. src\resources\davisWiki\Quantitative_Biology_and_Bioinformatics.f
+ 7. src\resources\davisWiki\What_I_Wish_I_Knew...Before_Coming_to_UC_Davis_Entomology.f
+ 8. src\resources\davisWiki\Graduate_Groups.f
+ 9. src\resources\davisWiki\Computer_Science.f
+
+Why can we not simply set the query to be the entire information need description?
+	-Setting the query to the entire information need description will erroneously filter out documents that contain related content but are potentially filtered out by semantically less important words in the information need description. Because this is a search index over UC Davis documents, the UC Davis part is assumed for many pages that may contain relevant material. The word info and level also may not be used, which may eliminate documents that are very relevant. The information need is not connected with the Search Index's understanding of the document tree, which is very simply based on the words used. It would be hard to formulate an Information Need with correct grammar that don't contain words that could only eliminate search results that may or may not be related. 
+
+Computational Complexity?
+	Experimental Evaluation
+		-Select a term that will occur about as frequently among all documents, perhaps pronouns or prepositions. We assume that the frequency will increase directly with the enlargement of the dataset if we choose a proper term. Evaluate query times with the beginning dataset, then increase the number of documents and determine any relation between the query evaluation time and the size of the searched documents. Choosing a term that occurs infrequently or more or less frequently among the set of added documents will give you a biased perspective as the intersections performed and documents retrived will not increase directly with the amount of documents searched.
+
+	Discussion
+		-In my implementation, the computational complexity varies directly with the number of tokens indexed, as I add a row for each word in each position that must be searched. For intersection queries, the evaluation time can increase directly, if the intersection is done naively. As described in the textbook, if we start with the lowest number of doc matches in our set, choosing the most rare term, then our intersections become only as costly as the rare term occurences increase, which may be at a much slower rate than the rest of the dataset. However, if an intersection query is performed on a dataset that continues to add occurences of all the words, generating more matching documents for each word in the query, then the runtime will increase. One could experiment by finding a very rare term, then add general documents that do not increase the occurrence of that term, and then running an intersection query that includes that rare term. The performance of the intersection should remain the same as the retained docs will be constant. However, the performance of looking up and retrieving all of the docId matches may increase drastically if the set is huge. My sql index should keep this relatively low. For phrase queries, there may often be more matches to consider, but again, for rare beginning query term occurences, many documnets may quickly be eliminated without having to trace far through the phrase.

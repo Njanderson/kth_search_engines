@@ -10,17 +10,13 @@
 
 package ir;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-
-import ir.PostingsList;
 
 
 /**
@@ -28,43 +24,32 @@ import ir.PostingsList;
  */
 public class HashedIndex implements Index {
 
-    /** The index as a hashtable. */
+    /** The index as a HashMap. */
     private HashMap<String,PostingsList> index = new HashMap<String,PostingsList>();
+    
+    /** For normalization of ranked retrieval */
+    private HashMap<Integer, Integer> docLengths = new HashMap<Integer, Integer>();
 
 
     /**
      *  Inserts this token in the index.
      */
     public void insert( String token, int docID, int offset ) {
-	//
-	//  YOUR CODE HERE
-	//
     	if (!index.containsKey(token)) {
     		index.put(token, new PostingsList());
     	}
     	index.get(token).put(docID, offset);
+    	if (!docLengths.containsKey(docID)) {
+    		docLengths.put(docID, 0);
+    	}
+    	docLengths.put(docID, docLengths.get(docID) + 1);
     }
-
-
-//    /**
-//     *  Returns all the words in the index.
-//     */
-//    public Iterator<String> getDictionary() {
-//	// 
-//	//  REPLACE THE STATEMENT BELOW WITH YOUR CODE
-//	//
-//    	return index.keySet().iterator();
-//    }
-
 
     /**
      *  Returns the postings for a specific term, or null
      *  if the term is not in the index.
      */
     public PostingsList getPostings( String token ) {
-	// 
-	//  REPLACE THE STATEMENT BELOW WITH YOUR CODE
-	//
     	return index.get(token);
     }
 
@@ -72,10 +57,7 @@ public class HashedIndex implements Index {
     /**
      *  Searches the index for postings matching the query.
      */
-    public PostingsList search( Query query, int queryType, int rankingType, int structureType ) {
-	// 
-	//  REPLACE THE STATEMENT BELOW WITH YOUR CODE
-	//
+    public PostingsList search(Query query, int queryType, int rankingType, int structureType) {
     	LinkedList<String> queryTerms = query.getQueryTerms();
     	if (queryType == Index.PHRASE_QUERY) {
     		
@@ -116,18 +98,52 @@ public class HashedIndex implements Index {
 				}
     		}
     		return retList;
-    	} else {
-    		PostingsList retList = index.get(queryTerms.get(0));
+    	} else if (queryType == Index.INTERSECTION_QUERY) {
+    		PostingsList intersectionList = index.get(queryTerms.get(0));
     		if (queryTerms.size() > 1) {
-    			retList = intersectPostingsLists(true, retList, index.get(queryTerms.get(1)));
-    			for (int queryTermIndex = 2; queryTermIndex < queryTerms.size() && !retList.isEmpty(); queryTermIndex++) {
-    				retList = intersectPostingsLists(false, retList, index.get(queryTerms.get(queryTermIndex)));
+    			intersectionList = intersectPostingsLists(true, intersectionList, index.get(queryTerms.get(1)));
+    			for (int queryTermIndex = 2; queryTermIndex < queryTerms.size() && !intersectionList.isEmpty(); queryTermIndex++) {
+    				intersectionList = intersectPostingsLists(false, intersectionList, index.get(queryTerms.get(queryTermIndex)));
     			}
     		}
-    		return retList;
-    	}    	
+			return intersectionList;
+    	} else if (queryType == Index.RANKED_QUERY) {
+    		Set<Integer> docIds = new HashSet<Integer>();
+    		for (int queryWordIndex = 0; queryWordIndex < queryTerms.size(); queryWordIndex++) {
+    			docIds.addAll(index.get(queryTerms.get(queryWordIndex)).getDocIDs());
+    		}
+    		PostingsList scoredDocs = new PostingsList();
+    		for (Integer docId: docIds) {
+    			scoredDocs.put(docId);
+    		}
+			for (String queryTerm : queryTerms) {
+    			PostingsList queryTermList = index.get(queryTerm);
+				for (Integer docId : docIds) {
+					if (index.get(queryTerm).containsDocId(docId)) {
+						PostingsEntry en = scoredDocs.get(docId);
+						int tf = index.get(queryTerm).get(docId).offsets.size();
+	            		double idf = Math.log10(docLengths.keySet().size()/index.get(queryTerm).size());
+	            		en.score += tf * idf / docLengths.get(docId);
+					}
+				}
+    		}
+			return scoredDocs;
+    	} else {
+    		return new PostingsList();
+
+    	}
     }
 
+    /**
+     * Performs an intersection between two PostingsList. 
+     * TODO The result PostingsList's PostingEntry position values are not accurate afterwards
+     * because the merged, new document obviously doesn't really exist, and the positions are
+     * only related to the original document
+     * @param includeFirst
+     * @param firList
+     * @param secList
+     * @return
+     */
 	public PostingsList intersectPostingsLists(boolean includeFirst, PostingsList firList, PostingsList secList) {
     	PostingsList resList = new PostingsList();
     	Iterator<Integer> firIter = firList.docIDtoPostings.keySet().iterator();	

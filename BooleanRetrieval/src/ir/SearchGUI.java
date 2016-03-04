@@ -9,17 +9,32 @@
 
 package ir;
 
+import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.StringTokenizer;
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.event.*;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JToggleButton;
+import javax.swing.KeyStroke;
 
 
 /**
@@ -179,8 +194,13 @@ public class SearchGUI extends JFrame {
 		    }
 		    StringBuffer buf = new StringBuffer();
 		    if ( results != null ) {
-			buf.append( "\nFound " + results.size() + " matching document(s)\n\n" );
-			Iterator<PostingsEntry> it = results.getIterator();
+			buf.append( "\nFound " + results.docOccurrenceSize() + " matching document(s)\n\n" );
+			Iterator<PostingsEntry> it = null;
+			if ( queryType == Index.RANKED_QUERY ) {
+				it = results.getScoreSortedIterator();
+			} else {
+				it = results.getIterator();
+			}
 			int i = 0;
 			while (it.hasNext()) {
 				PostingsEntry entry = it.next();
@@ -190,7 +210,7 @@ public class SearchGUI extends JFrame {
 				buf.append( "" + entry.docID );
 			    }
 			    else {
-				buf.append( "" + entry.docID + filename );
+				buf.append( "" + filename );
 			    }
 			    if ( queryType == Index.RANKED_QUERY ) {
 				buf.append( "   " + String.format( "%.5f", entry.score )); 
@@ -230,8 +250,8 @@ public class SearchGUI extends JFrame {
 			    results = indexer.index.search( query, queryType, rankingType, structureType );
 			}
 			buf.append( "\nSearch after relevance feedback:\n" );
-			buf.append( "\nFound " + results.size() + " matching document(s)\n\n" );
-			for ( int i=0; i<results.size(); i++ ) {
+			buf.append( "\nFound " + results.docOccurrenceSize() + " matching document(s)\n\n" );
+			for ( int i=0; i<results.docOccurrenceSize(); i++ ) {
 			    buf.append( " " + i + ". " );
 			    String filename = indexer.index.docIDs.get( "" + results.get(i).docID );
 			    if ( filename == null ) {

@@ -90,11 +90,6 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
 			addOffset(offset);
 		}
 	}    
-
-    //
-    //  YOUR CODE HERE
-    //
-
 }
 
     

@@ -1,0 +1,19 @@
+Task 1.4
+Query 1: zombie attack
+	14 documents retrieved
+	11/14 were relevant
+	precision = 79%
+	recall = 1.4%
+
+Query 2: money transfer
+	2 documents retrieved
+	1/2 were relevant
+	precision = 50%
+	recall = 0.2%
+
+Query 3: graduate program bioinformatics
+	4 documents retrieved
+	4/4 were relevant
+	precision = 100%
+	recall = 0.4%
+
