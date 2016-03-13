@@ -1,0 +1,223 @@
+Nick Anderson
+1328354
+nja4@uw.edu
+
+3.1) Using combination with a beta of 0.5
+
+zombie attack:
+Found 249 matching document(s)
+
+ 0. src\resources\davisWiki\JasonRifkind.f   0.71100
+ 1. src\resources\davisWiki\Starbucks.f   0.30089
+ 2. src\resources\davisWiki\Davis_Police_Department.f   0.29598
+ 3. src\resources\davisWiki\Activities_and_Recreation_Center.f   0.19965
+ 4. src\resources\davisWiki\Explore.f   0.18758
+ 5. src\resources\davisWiki\UC_Davis_Police_Department.f   0.18451
+ *6. src\resources\davisWiki\Kearney_Hall.f   0.15237
+ *7. src\resources\davisWiki\Zombie_Walk.f   0.14189
+ 8. src\resources\davisWiki\Lake_Spafford.f   0.12889
+ 9. src\resources\davisWiki\Winter_2005_ASUCD_Election.f   0.12700
+
+---After---
+
+Search after relevance feedback:
+
+Found 17062 matching document(s)
+
+ 0. src\resources\davisWiki\JasonRifkind.f   0.70172
+ 1. src\resources\davisWiki\UC_Davis.f   0.30060
+ 2. src\resources\davisWiki\Davis.f   0.27399
+ 3. src\resources\davisWiki\Photo_Requests.f   0.24261
+ 4. src\resources\davisWiki\Woodland.f   0.11005
+ 5. src\resources\davisWiki\Sacramento.f   0.10961
+ 6. src\resources\davisWiki\Zombie_Walk.f   0.10881
+ 7. src\resources\davisWiki\ASUCD.f   0.10703
+ 8. src\resources\davisWiki\Kearney_Hall.f   0.08032
+ 9. src\resources\davisWiki\Davis_Police_Department.f   0.07575
+
+money transfer:
+
+Found 1602 matching document(s)
+
+ 0. src\resources\davisWiki\MattLM.f   0.70079
+ 1. src\resources\davisWiki\Angelique_Tarazi.f   0.47989
+ 2. src\resources\davisWiki\JordanJohnson.f   0.43412
+ 3. src\resources\davisWiki\Transfer_Student_Services.f   0.31931
+ 4. src\resources\davisWiki\Davis.f   0.30391
+ 5. src\resources\davisWiki\NicoleBush.f   0.19861
+ *6. src\resources\davisWiki\Title_Companies.f   0.17856
+ 7. src\resources\davisWiki\Woodland.f   0.16724
+ 8. src\resources\davisWiki\Anthony_Swofford.f   0.15274
+ *9. src\resources\davisWiki\Transfer_Student_Association.f   0.14932
+
+
+NOTE: all documents were relatively irrelevant, so the "relevant" documents are only psuedo-relevant.
+ ---After---
+
+
+Search after relevance feedback:
+
+Found 16782 matching document(s)
+
+ 0. src\resources\davisWiki\MattLM.f   0.70050
+ 1. src\resources\davisWiki\Angelique_Tarazi.f   0.46727
+ 2. src\resources\davisWiki\JordanJohnson.f   0.43380
+ 3. src\resources\davisWiki\Davis.f   0.30879
+ 4. src\resources\davisWiki\Transfer_Student_Services.f   0.27734
+ 5. src\resources\davisWiki\NicoleBush.f   0.25279
+ 6. src\resources\davisWiki\NoraSandstedt.f   0.23754
+ 7. src\resources\davisWiki\Title_Companies.f   0.23337
+ 8. src\resources\davisWiki\UC_Davis.f   0.22242
+ 9. src\resources\davisWiki\Anthony_Swofford.f   0.15930
+
+graduate program computer science:
+
+ Found 3176 matching document(s)
+
+ 0. src\resources\davisWiki\ECS.f   0.70071
+ *1. src\resources\davisWiki\Computer_Science_and_Engineering.f   0.70059
+ 2. src\resources\davisWiki\The_Computer_Panacea.f   0.53547
+ 3. src\resources\davisWiki\JillNi.f   0.52595
+ 4. src\resources\davisWiki\CSIF.f   0.42254
+ 5. src\resources\davisWiki\The_Dungeon.f   0.42087
+ 6. src\resources\davisWiki\Heron_Technologies.f   0.35738
+ 7. src\resources\davisWiki\Local_Computer_Tech_Help.f   0.35708
+ 8. src\resources\davisWiki\Grad_Students.f   0.35314
+ *9. src\resources\davisWiki\Computer_Science_Club.f   0.35105
+
+---After---
+
+Search after relevance feedback:
+
+Found 13105 matching document(s)
+
+ 0. src\resources\davisWiki\ECS.f   0.70117
+ 1. src\resources\davisWiki\Computer_Science_and_Engineering.f   0.70098
+ 2. src\resources\davisWiki\The_Computer_Panacea.f   0.61347
+ 3. src\resources\davisWiki\Local_Computer_Tech_Help.f   0.53214
+ 4. src\resources\davisWiki\CSIF.f   0.48251
+ 5. src\resources\davisWiki\The_Dungeon.f   0.47951
+ 6. src\resources\davisWiki\Heron_Technologies.f   0.46059
+ 7. src\resources\davisWiki\JillNi.f   0.40277
+ 8. src\resources\davisWiki\Computer_Science_Club.f   0.37643
+ 9. src\resources\davisWiki\Nutrition_Science.f   0.36462
+
+
+
+ What	happens	to	the	two	documents	that	you	selected?
+ The documents selected add their word sets to the query words less weight than the original query words, hoping to cluster similar documents. This would capture documents that contain synonyms that occur in the relevant documents. They add contributions to the original query.
+
+
+ What	are	the	characteristics	of	the	other	documents	in	the	new	top	ten	list	- what	are	they
+ about?
+ They are more clustered around the words seen in the chosen relevant documents. Considering Zombie Attack, we perhaps don't want JasonRifKind to be a top result still, so we chose other documents. However, these documents contain a heavy sampling of zombie, the primary word in the JasonRifKind document, so along with adding contributions of other words, JasonRifKind still keeps gaining score. The problem with tf-idf and short documents continues to be a problem, because many of the words that we add to the query words likely will not contribute to the query as much as the original words, unless we change our weighting scheme to matter more.
+
+ Are	there	any	new	ones	that	were	not	among	the	top	ten	before?
+ Yes, there are often new documents in the top 10, sometimes with irrelevant topics that are considered relevant due to some of the more obscure words in the "relevant" document giving them matches coincidentally. With the addition of Nutrition_Science, we grabbed this document because of the selection of Science to be very relevant, so the Science in the short Nutrition_science document gets a higher weight to place it into the top 10.
+
+
+ Play	with	the	weights	α and	β: How	is	the	relevance	feedback	process	affected	by	α and	β?
+NOTE: The relative weights of a and β are the most important rather, so setting a = β would be the same regardless of a and β.
+
+zombie attack demonstrated a much better result after feedback when the documents used to cluster were very relevant, whereas all the results from money transfer were very poor by result, so the relevance feedback did not appreciably improve. The relevant documents for computer science graduate program were all very short links, so they did not add anything to cluster.
+
+Using combination with a beta of 1, so a = β
+
+NOTE: Obviously the ---Before--- would be the same, so only posting the ---After---
+
+---zombie attack---
+
+Search after relevance feedback:
+
+Found 17062 matching document(s)
+
+ 0. src\resources\davisWiki\JasonRifkind.f   0.71100
+ 1. src\resources\davisWiki\Starbucks.f   0.30089
+ 2. src\resources\davisWiki\Davis_Police_Department.f   0.29598
+ 3. src\resources\davisWiki\Activities_and_Recreation_Center.f   0.19965
+ 4. src\resources\davisWiki\Explore.f   0.18758
+ 5. src\resources\davisWiki\UC_Davis_Police_Department.f   0.18451
+ 6. src\resources\davisWiki\Kearney_Hall.f   0.15237
+ 7. src\resources\davisWiki\Zombie_Walk.f   0.14189
+ 8. src\resources\davisWiki\Lake_Spafford.f   0.12889
+ 9. src\resources\davisWiki\Winter_2005_ASUCD_Election.f   0.12700
+
+---money transfer---
+
+ Search after relevance feedback:
+
+ Found 16782 matching document(s)
+
+  0. src\resources\davisWiki\MattLM.f   0.70079
+  1. src\resources\davisWiki\Angelique_Tarazi.f   0.47989
+  2. src\resources\davisWiki\JordanJohnson.f   0.43412
+  3. src\resources\davisWiki\Transfer_Student_Services.f   0.31931
+  4. src\resources\davisWiki\Davis.f   0.30391
+  5. src\resources\davisWiki\NicoleBush.f   0.19861
+  6. src\resources\davisWiki\Title_Companies.f   0.17856
+  7. src\resources\davisWiki\Woodland.f   0.16724
+  8. src\resources\davisWiki\Anthony_Swofford.f   0.15274
+  9. src\resources\davisWiki\Transfer_Student_Association.f   0.14932
+
+---graduate program computer science---
+
+Search after relevance feedback:
+
+Found 13105 matching document(s)
+
+ 0. src\resources\davisWiki\ECS.f   0.70071
+ 1. src\resources\davisWiki\Computer_Science_and_Engineering.f   0.70059
+ 2. src\resources\davisWiki\The_Computer_Panacea.f   0.53547
+ 3. src\resources\davisWiki\JillNi.f   0.52595
+ 4. src\resources\davisWiki\CSIF.f   0.42254
+ 5. src\resources\davisWiki\The_Dungeon.f   0.42087
+ 6. src\resources\davisWiki\Heron_Technologies.f   0.35738
+ 7. src\resources\davisWiki\Local_Computer_Tech_Help.f   0.35708
+ 8. src\resources\davisWiki\Grad_Students.f   0.35314
+ 9. src\resources\davisWiki\Computer_Science_Club.f   0.35105
+
+ Why	is	 the	search	after	feedback	 slower?
+There are so many more words to consider when we are intersecting so many added words from the contents of both documents. In addition, iterating through all the words from a document and adding to the list, and totaling weights, and indexing the massive linked list of query words to add weights properly also takes time.
+
+ Why	is	 the	number	 of
+ returned	documents	larger?
+There are more words, so more documents match on the words added from the relevant documents.
+
+
+3.2)	Designing	an	evaluation
+To evaluate our search engine with relevance feedback, we can use the results from tasks 1.4 and 2.3 as a comparison to determine which of the three seems to perform best on the same queries using the metrics of precision and recall at some number of documents.
+
+We can choose some example queries, such as the ones used in previous assignments, like zombie attack, money transfer, and graduate program mathematics, and compare the recall and precision through graphs, then directly compare precision-at-10 between the three measures across these queries. Make sure queries return enough relevant documents in the top X, unlike money transfer. The documents returned also must have a certain length rather than just be a link hub unlike many in the top 10 of graduate program computer science. When comparing some top X, pick all relevant documents, with at least two. Rather than skewing our search by selecting queries that favor relevance feedback, the effect of relevance feedback without short or irrelevant documents is more interesting and illuminating. Short documents don't add enough words to cluster around, and irrelevant documents won't be selected, adding no more words to cluster documents around.
+
+Once the experiment is conducted, we will have relevance at 10, 20, 30, 40, 50 represented through precision-recall curves. In addition, we can compare the more one dimensional precision-at-10 metric, merely one number describing the precision for: intersection query, phrase query, ranked retrieval, and then ranked retrieval after feedback.
+
+3.3)
+Tests conducted with 10,000 trials across these queries:
+
+Original algorithm: Documents containing 1+ words
+zombie attack Completed ranked retrieval in: 1.3167630352E10
+money transfer Completed ranked retrieval in: 2.2625371061E10
+graduate program mathematics Completed ranked retrieval in: 3.6954233356E10
+computer science Completed ranked retrieval in: 2.2263782694E10
+graduate program computer science Completed ranked retrieval in: 6.8203514148E10
+graduate program chemical engineering Completed ranked retrieval in: 4.5289137715E10
+davis california Completed ranked retrieval in: 1.49407115603E11 (way longer due to 10,000+ documents)
+davis california university UCDavis Completed ranked retrieval in: 1.73051726931E11
+
+Algo1: Documents containing floor(queryLength/2) words
+-- Only changes queries with at least 4 words in this case, since I floor, not ceil --
+zombie attack Completed ranked retrieval in: 2.540291887E9
+money transfer Completed ranked retrieval in: 2.1661983349E10
+graduate program mathematics Completed ranked retrieval in: 3.3453791678E10
+computer science Completed ranked retrieval in: 2.3281590073E10
+graduate program computer science Completed ranked retrieval in: 2.3477247641E10
+graduate program chemical engineering Completed ranked retrieval in: 1.0400020306E10
+davis california Completed ranked retrieval in: 1.35073812031E11
+davis california university UCDavis Completed ranked retrieval in: 1.12299313305E11
+
+Algo2: Documents containing ceil(queryLength/2) words
+graduate program mathematics Completed ranked retrieval in: 4.1669807534E10
+
+To	pass	Task	3.3,	 you	should	be	able	 to	describe	 the	approximation you	implemented,
+how	 much	 is	 gained	 in	 terms	 of	 computation	 time,	 and	 what	 approximations	 to	 the
+search	are	made	in	order	 to	obtain the	speedup

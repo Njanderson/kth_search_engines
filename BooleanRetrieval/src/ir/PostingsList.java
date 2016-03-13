@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -123,6 +122,33 @@ public class PostingsList implements Serializable {
         public int compare(PostingsEntry fir, PostingsEntry sec) {
             return (new Double(sec.score)).compareTo(new Double(fir.score));
         }
+    }
+    
+    /**
+     * @return Double.MAX_VALUE if empty, min score of all docs otherwise
+     */
+    public double getMinScore() {
+    	double min = Double.MAX_VALUE;
+    	for (Integer docId: docIDtoPostings.keySet()) {
+    		if (docIDtoPostings.get(docId).score < min) {
+    			min = docIDtoPostings.get(docId).score;
+    		}
+    	}
+    	return min;
+    }
+    
+    /**
+     * 
+     * @return Double.MIN_VALUE if empty, max score of all docs otherwise
+     */
+    public double getMaxScore() {
+    	double max = Double.MIN_VALUE;
+    	for (Integer docId: docIDtoPostings.keySet()) {
+    		if (docIDtoPostings.get(docId).score > max) {
+    			max = docIDtoPostings.get(docId).score;
+    		}
+    	}
+    	return max;
     }
     
 }

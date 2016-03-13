@@ -1,0 +1,465 @@
+Nick Anderson
+1328354
+nja4@uw.edu
+
+Why	do	we	use	a union	query	here,	but	an	intersection	query	in	Assignment	1?
+Through a union query, we do not eliminate matches if a match does not contain a term,
+but rather, we just don't credit it with any more score, so if a term has more term
+occurrences, naturally it will naturally be ranked higher. Documents that contain a smaller subset of the words, too, could be matches with synonyms, like zombie assault instead of attack.
+
+
+2.2)
+Look	 at	 the	10	highest	 ranked	 document	 returned	 by	your	 search	engine	for	each	 query.
+Why	are	these	documents ranked	highly?	Be	prepared	to	explain	this	using	pen	and	paper
+
+	1. --zombie attack--
+
+		NOTE: Zombie is weighted much more than attack due to inverse doc frequence (36 occurrences on zombie versus 228 for attack).
+
+		1. JasonRifkind is a very short document, with the word zombie twice, so its dividend is much smaller than for other queries, and it contains an infrequent query words twice.
+		2. Zombie_Walk is again relatively short, and contains zombie many times, and attack once.
+		3. Kearney_Hall is also short, and contains both zombie and attack twice.
+		4. Measure_Z.f is short-intermediate, contains zombie once, attack twice.
+		5. Spirit_Halloween.f is short-intermediate, longer than Measure_Z and contains 2 zombies, 1 attack
+		6. EmilyMaas.f is shorter than the previous 2, but contains only zombibe once
+		7. AliciaEdelman.f is longer than the previous 1, but also contains only zombie once
+		8.TheWarrior.f is short but contains attack only once.
+		9. Scream.f contains zombie twice and attack once, but is much longer than the previous
+		10. Zombies_Reclaim_the_Streets.f is very long, but with many occurences of Zombie, so it gets diluted.
+
+	2. --money transfer--
+
+		NOTE: Transfer is weighted much more than money due to inverse doc frequence (281 occurrences on transfer versus 1427 for money).
+
+		1. MattLM contains the more weighted word transfer twice and is very short.
+		2. Angelique_Tarazi contains the more weighted word transfer twice and is very short, but slightly longer than MattLM, otherwise would be equivalent.
+		3. JordanJohnson contains the more weighted word transfer twice and is very short, but slightly longer than Angelique_Tarazi.
+		4.NicoleBush.f is very short, but only contains transfer once
+		5.Title_Companies.f is short, but longer than the previous with the same one occurrence of transfer
+		6.Anthony_Swofford.f is short, but longer than the previous 2, but has twice the occurrences of transfer, but the length makes it ranked lower.
+		7.Transfer_Student_Association.f contains transfer 3x, but is even longer than the previous
+		8.Munch_Money.f is short-intermediate, but with many occurences of the less weighted term money.
+		9.money.f has 8 occs of money, but has a very long length and no occurences of the much more weighted term transfer.
+		10.NinadelRosario.f is very short, but not among the shortest documents, whose one occurrence of transfer is beated by the previous 8 occs of money.
+
+
+
+Discuss	 how	 variations	 in	 tf
+representation	 (such	 as	 log(1+tf)) and	 document	 length	 representation	 (such	 as
+Euclidean	length,	or	sqrt(#words)) affect the	cosine	similarity	measure.
+
+idf = log(N/df) = # of documents in corpus w term, N is total # of documents
+tf = # of occurrences in the document
+
+tf-idf = tf*idf / len(doc)
+
+Variations in tf representation
+	As discussed in the text and lecture, "a document that contains a word 10x more times is not 10x more relevant," so we may want to change our scaling with the number of documents. Using the log(1+tf) scaling factor instead of just tf accounts for the decrease of the importance in mentions as mentions increase. In many longer, more in-depth discussions, synonyms may be used as well, which further adds to the lack of importance of terms. The additional 1 makes sure you never have a log(0).
+
+Variations in document length representation
+	Document length is used to normalize scores, so longer and more wordy documents that naturally have more occurrences of query terms aren't weighted higher than shorter, perhaps more targetted discussions. Using other scaling factors such as sqrt(#words) will decrease the dividend that is used to scale down longer documents. This essentially will penalize longer documents less.
+
+Use of Euclidian Distance versus Cosine Similarity
+	Euclidian distance takes the difference in position in the n=#queryWords dimensional space, so the best matches would then be where documents mention query words the same amount of times as the query. For most queries, we would rather be interested in direction, regardless of distance and # of mentions, so we use cosine similarity, which uses the dot product to compare how much each query's word vector is "pointing in the same direction" as the document's word vector.
+
+
+Precision & Recall
+
+Precision = |TP| / (|TP| + |FP|)
+
+Recall = |TP| / (|TP| + |FN|)
+
+2.3)
+
+Plot a	precision-recall	graph	for	 the	returned	 top-50	list,	and	compute	 the	precision
+at	10, 20,	30,	40,	and	50 (relevant	documents	=	documents	with	relevance	>	0).
+		Recall	Precision
+10: 1	0.1		0.1
+20: 2	0.2		0.1
+30: 2	0.3		0.0667
+40: 4	0.4		0.1
+50: 4	0.4		0.08
+
+My curve would be much more aligned with what I would expect, with high initial relevance, then quickly decreasing relevance, but I judged:
+
+QUERY_ID = 1, DOC_ID = Davis_Graduate, RELEVANCE_SCORE = 0 -----> Mention of graduates, but nothing about Math or a graduate program
+QUERY_ID = 1, DOC_ID = Grad_Students, RELEVANCE_SCORE = 0 ----> Mention of graduates, but not enough emphasis on Math
+QUERY_ID = 1, DOC_ID = Evelyn_Silvia, RELEVANCE_SCORE = 1 ---> Big part of department, created curriculum and culture, prestigious teacher who would affect the Graduate Program in math. Gets a good score due to many mentions of math and graduate.
+
+Which	precision	is	the	highest? Are	there	any	trends?
+The query is very highly affected by the corpus, and we have many contexts for the word program and graduate. Specifically, students really mess up the query because graduate students have short bios with the term graduate.
+
+Precision is equal at 10, 20, and 30 documents. There does not seem to be a perceivable pattern, but I suspect that there would be a general decline as fewer and fewer documents would be relevant, but so many would be returned due to matching on containing just 1 of the words. So program and graduate likely match on many documents that are unrelated.
+
+Recall is obviously going to be higher as we include more documents because adding more documents is non decreasing, but it seems like the rate of increase is decreasing, and no doubt that trend would become more clear as more documents were included.
+
+Ranked Retrieval
+Having a phrase or intersection query that's unranked will eliminate many more documents, including many that are relevant, retaining only those with the given terms, which filters out many more bad matches or matches that merely have a lot of one of the terms, so the precision can be a lot higher merely due to very few documents being returned. If they have graduate program bioinformatics or very specific, rare words, then more likely that any document with all of those words will be related. However, the recall is much lower because we lose out on perhaps some documents using synonyms for one of the words, or otherwise containing a subset of the words.
+This is where the ranked retrieval will shine, returning many more documents, but sacrificing precision for reasons related to document length and occurrence of one word many times perhaps outshadowing documents with all of the words.
+
+PowerIteration...
+1. 121, 0.00798127257317499 // Davis
+2. 21, 0.007731570382243691 // Photo_Request
+3. 245, 0.007360200557250774 // UC_Davis
+4. 1531, 0.005094248846795316 // Seed/Definition
+5. 1367, 0.002836810239023361 // departed_businesses
+6. 31, 0.0025371174990797534
+7. 80, 0.002216418040553719
+8. 1040, 0.0021826066444895218
+9. 254, 0.0020235843285522077
+10. 452, 0.001945510112715455
+11. 157, 0.001626443805985293
+12. 392, 0.0016196066131114893
+13. 169, 0.0016099183523670935
+14. 100, 0.0015631767643820016
+15. 561, 0.0014602840087287318
+16. 3870, 0.0014440463423372333
+17. 997, 0.0013543281244107457
+18. 884, 0.0012778289183369874
+19. 202, 0.0012661922660596359
+20. 8, 0.0012575618474148693
+21. 72, 0.001230577671144724
+22. 145, 0.001190202603582853
+23. 27, 0.001092150787914046
+24. 645, 0.001083201564838003
+25. 490, 0.0010627307767168642
+26. 2883, 0.0010501732635321871
+27. 81, 0.0010265160376339995
+28. 942, 0.0010102073903718895
+29. 125, 9.522922539819189E-4
+30. 247, 9.403400225058217E-4
+31. 337, 8.777878701268405E-4
+32. 179, 8.776359889388032E-4
+33. 708, 8.767171933503729E-4
+34. 1403, 8.697340867633612E-4
+35. 484, 8.576750562555132E-4
+36. 26, 8.54115019708793E-4
+37. 152, 8.52660189027621E-4
+38. 321, 8.278099179839872E-4
+39. 242, 8.119179099698885E-4
+40. 15492, 7.913997831945194E-4
+41. 1964, 7.870060021560016E-4
+42. 1043, 7.853585737230685E-4
+43. 857, 7.714427805118703E-4
+44. 1755, 7.505213583555007E-4
+45. 1200, 7.227227914411388E-4
+46. 281, 7.12032480527307E-4
+47. 154, 7.091956372747784E-4
+48. 16, 7.031397420140264E-4
+49. 1365, 7.023941620303737E-4
+50. 1153, 7.00502547520548E-4
+
+
+The	highest	ranked	document has	the	title	”Davis”,	while	the	document ranked	50 has	the
+title	”Interpreting	User	Statistics”.	Does	this	pagerank	ordering	seem	reasonable?	Why?
+
+Davis is a huge hub of descriptions of most details about Davis California, with most of the descriptors having hyperlinks to other websites. Surely many other urls would link to Davis, such as the university website that must describe the location of the website. Because Davis is a central source of information, really the center of the entire wiki, it does make sense that it would be first. As for Interpreting User Statistics, I would imagine other documents that contain statistics would like to refer to some way to better understand the statistics presented, so it's likely to be a hub of information. All of the websites are likely organizations, like UC Davis or a department of the University or more general concepts like understanding Statistics or even a page describing local regulations or phone numbers or resources.
+
+
+Look	 up	 the	 titles	 of	 some	 other	 documents	 with	 high rank.	 What	 is	 the	 trend	 with
+decreasing	pagerank?
+
+A hub article that provides very general information to a huge community, like with photo requests, Davis, and UCDavis making up the top 3, getting more and more specific. By the time we get to 30, we are talking about highways, which are a sub category of Davis. When we are at 45, we are at a hub page archiving the year 2011. These are terms that are all less and less likely to come up in other wikis but are general hubs of information that people want to link to.
+
+Do	 your	 findings	 about	 the	 difference	 between	 the	 five	 method	 variants	 and	 the
+dependence	of	N	support	the	claims	made	in	the	paper	by	Avrachenkov	et	al.?
+
+MC4, stopping at dangling nodes, converged very quickly, with the smallest initial value at N tied with MC3. However, rather than being better than all the others, in my experiments, MC3 performed comparably better in every experiment. However, my initial results were even more variable until I averaged multiple trials. The results presented averaged three trials, so perhaps averaging 10 or 100 trials would better demonstrate MC4's superiority. Consistent with the paper, "MC complete path stopping
+in dangling nodes performs the best, followed by MC complete path with random start. MC end-point with cyclic start has the worst performance." Also my path length was set to 100, so possibly a shorter path length will also increase MC4's relative performance to MC3. However, the performance of MC4 is so much better timewise than MC3, so it is much better by a factor of 4 or 5. Results at bottom.
+
+Considering the first two method, MC2 outperforms MC1, perhaps because, "Since n is known, an unnecessary randomness in experiments can be avoided by taking N = mn and initiating the random walk exactly m times from each page in a cyclic fashion, rather than jumping N times to a random page." The cyclic start significantly outperforms random start in my experiments.
+
+What	do	you	 see?	Why	do	you	get	 this	result?	Explain	and	relate	 to	 the	properties	of	 the
+(probabilistic)	 Monte-Carlo	 methods	 in	 contrast	 to	 the	 (deterministic)	 power	 iteration
+method.
+
+As explained in the paper, MC methods are much more reliable on the top page rank documents, so the top 50 converge much more quickly and become accurate with a much fewer N value. This is because, from the paper:
+
+"Strikingly, it follows from (3.7) that the MC method gives good results for important
+pages in one iteration only, that is, when m = 1. From the examples of PageRank
+values presented in [5], it follows that the PageRank of popular pages is at least 10^4
+times greater than the PageRank of an average page. Since the PageRank value is
+bounded from below by (1−c)/n, the formula (3.7) implies that if the important pages
+have PageRank 10^4 times larger than the PageRank of the pages with the minimal
+PageRank value, the MC method achieves an error of about 1% for the important
+pages already after the first iteration. In contrast, the power iteration method takes
+into account only the weighted sum of the number of incoming links after the first
+iteration."
+
+Because MC methods use more randomness to pick links instead of dividing probability like power iteration, the top links are more likely to be picked across many selection stages, so they are more highly weighted quickly.
+
+
+For convergence of the top 50:
+
+After trying values such as 0.0005 and others, MC3 always seems to converge the fastest for me.
+
+Converge to less than 0.001 error for each of the top 50 True Values
+mcCompletePath converged at n=435978
+mcCompletePathStopDanglingRandomStart converged at n=1065724
+mcCompletePathStopDangling converged at n=1114166
+mcRandomStart converged at n=1937680
+mcCyclicStart converged at n=2276774
+
+
+
+Take	a	look	at	the	curves	for	goodness	measure	2	and	compare	to	goodness	measure	1.
+What	do	you	 see?	Why	do	you	get	 this	result?	Explain	and	relate	 to	 the	properties	of	 the
+(probabilistic)	 Monte-Carlo	 methods	 in	 contrast	 to	 the	 (deterministic)	 power	 iteration
+method.
+
+The random ones do not reach all of the documents for small N, so the bottom 50 do not converge nearly as quickly, compared to the cyclic start MC methods, but the bottom ones aren't nearly as important, especially for the top 50. The random method however has the perk that it doesn't require iterating over all the documents, because it's skewed to the top results, which we care about more.
+
+This is because the Monte Carlo methods assert chance, and as we have discussed, the uncommon possibilities are much more likely to be underestimated than overestimated, so the top values are much more accurately and quickly assessed as they get hit so many more times. The top is overrepresented.
+
+The deterministic method however continues to distribute the probability completely accurately, even the smallest probabilities are accurately maintained, so across values you will see no obvious under estimation for the lowest links, rather you see accuracy increasing across all values. Eventually the "chance" based MC methods will converge just due to statistics.
+
+
+What	is	 the	 effect	 of	letting	 the	 tf-idf	 score	 dominate this ranking?	What	is	 the	 effect	 of
+letting	the	pagerank	dominate? What	would	be	a	good	strategy	for	selecting	an	”optimal”
+combination?	(Remember	the	quality	measures	you	studied	in	Task	2.3.)
+
+Letting a tf-idf score focuses on the matching of query words and their attributes across the corpus with respect to frequency as a proxy of discerning potential. Pagerank adds an additional layer of discernment where we can consider authority, or hubs that have a high rank independent of query words. This will allow us to better separate out relevant pages that merely "cheat" the system of tf-idf scores, really short documents that contain just a few, obscure words including the desired ones. An example would the graduate students, who would no longer have as high of a rank.
+
+With 50-50 weighting for the query "graduate program mathematics":
+
+Found 2163 matching document(s)
+
+ 0. src\resources\davisWiki\Math.f   0.50233
+ 1. src\resources\davisWiki\Davis.f   0.50084
+ 2. src\resources\davisWiki\UC_Davis.f   0.46147
+ 3. src\resources\davisWiki\Grad_Students.f   0.21005
+ 4. src\resources\davisWiki\TravisTaylor.f   0.20131
+ 5. src\resources\davisWiki\The_Grad.f   0.19911
+ 6. src\resources\davisWiki\Davis_Graduate.f   0.19846
+ 7. src\resources\davisWiki\Sacramento.f   0.15927
+ 8. src\resources\davisWiki\GRE.f   0.14933
+ 9. src\resources\davisWiki\ASUCD.f   0.13904
+ 10. src\resources\davisWiki\JulieB.f   0.13225
+
+ Which is an improvement with less obscure results. Honestly, the hub pages are very relevant for understanding the scope of the problem. UC_DAVIS is very general, but it explains about a potential graduate program, if you didn't even know the university was in the area, for example.
+
+With 30-70 (idf = 70):
+
+Found 2163 matching document(s)
+
+ 0. src\resources\davisWiki\Math.f   0.70140
+ 1. src\resources\davisWiki\Davis.f   0.30117
+ 2. src\resources\davisWiki\Grad_Students.f   0.28316
+ 3. src\resources\davisWiki\TravisTaylor.f   0.28079
+ 4. src\resources\davisWiki\UC_Davis.f   0.27719
+ 5. src\resources\davisWiki\The_Grad.f   0.27660
+ 6. src\resources\davisWiki\Davis_Graduate.f   0.27621
+ 7. src\resources\davisWiki\GRE.f   0.20745
+ 8. src\resources\davisWiki\JulieB.f   0.18410
+ 9. src\resources\davisWiki\EOP.f   0.17877
+ 10. src\resources\davisWiki\Mentorships_for_Undergraduate_Research_in_Agriculture%2C_Letters%2C_and_Science.f   0.17809
+
+ Math notably remained the same, but TravisTaylor moved down, a good result. UC_Davis was retained, which is another positive result. Sacremento was filtered out, as well.
+
+With 30-70 (pagerank = 70):
+
+Found 2163 matching document(s)
+
+ 0. src\resources\davisWiki\Davis.f   0.70050
+ 1. src\resources\davisWiki\UC_Davis.f   0.64576
+ 2. src\resources\davisWiki\Math.f   0.30326
+ 3. src\resources\davisWiki\Sacramento.f   0.22272
+ 4. src\resources\davisWiki\ASUCD.f   0.19451
+ 5. src\resources\davisWiki\Grad_Students.f   0.13694
+ 6. src\resources\davisWiki\TravisTaylor.f   0.12183
+ 7. src\resources\davisWiki\The_Grad.f   0.12163
+ 8. src\resources\davisWiki\Davis_Graduate.f   0.12071
+ 9. src\resources\davisWiki\Campus.f   0.10827
+ 10. src\resources\davisWiki\GRE.f   0.09122
+
+ Math moved down, which is a huge mark against this weighting. Sacremento was moved up, much too far, and more relevant results were pushed down, so this is a large worsening.
+
+With 10-90 (idf = 90):
+
+Found 2163 matching document(s)
+
+ 0. src\resources\davisWiki\Math.f   0.90047
+ 1. src\resources\davisWiki\TravisTaylor.f   0.36026
+ 2. src\resources\davisWiki\Grad_Students.f   0.35627
+ 3. src\resources\davisWiki\The_Grad.f   0.35408
+ 4. src\resources\davisWiki\Davis_Graduate.f   0.35395
+ 5. src\resources\davisWiki\GRE.f   0.26556
+ 6. src\resources\davisWiki\JulieB.f   0.23596
+ 7. src\resources\davisWiki\EOP.f   0.22845
+ 8. src\resources\davisWiki\Mentorships_for_Undergraduate_Research_in_Agriculture%2C_Letters%2C_and_Science.f   0.22822
+ 9. src\resources\davisWiki\Wilfred.f   0.19310
+ 10. src\resources\davisWiki\Planned_Education_Leave_Program.f   0.18263
+
+ We lost UC_Davis, which is a relevant result, and we want TravisTaylor to be moved down. From this case study, I would suggest 70% tf-idf, 30% pagerank.
+
+Reading file... done. Read 24221 number of documents
+PowerIteration...
+Complete
+
+
+For n=24221
+
+
+MCRandomStart:
+Time taken: 76.66666666666667
+2.393587809248252E-6	2.1857214590375513E-8
+
+
+MCCyclicStart:
+Time taken: 67.33333333333333
+4.5206804169067123E-7	7.285738196791838E-9
+
+
+MCCompletePath:
+Time taken: 58.666666666666664
+5.288382280772501E-8	3.5606681903571884E-9
+
+
+MCCompletePathStopDangling:
+Time taken: 22.333333333333332
+1.3881228340721051E-7	4.0306000370737176E-13
+
+
+MCCompletePathStopDanglingRandomStart:
+Time taken: 24.0
+2.194469607212551E-7	7.285738196791838E-9
+
+
+For n=48442
+
+
+MCRandomStart:
+Time taken: 68.33333333333333
+5.525969086184315E-7	2.1857214590375513E-8
+
+
+MCCyclicStart:
+Time taken: 70.66666666666667
+2.1432983243308044E-7	7.285738196791838E-9
+
+
+MCCompletePath:
+Time taken: 69.66666666666667
+5.3100728215858815E-8	3.6001005294027587E-9
+
+
+MCCompletePathStopDangling:
+Time taken: 20.666666666666668
+8.545695796338543E-8	9.062527327319143E-14
+
+
+MCCompletePathStopDanglingRandomStart:
+Time taken: 29.666666666666668
+1.6106036130891906E-7	7.285738196791838E-9
+
+
+For n=242210
+
+
+MCRandomStart:
+Time taken: 326.6666666666667
+2.0053404891525764E-7	2.1857214590375513E-8
+
+
+MCCyclicStart:
+Time taken: 274.3333333333333
+4.722303400106657E-8	7.285738196791838E-9
+
+
+MCCompletePath:
+Time taken: 299.0
+1.7918306424820233E-8	9.881119696989812E-10
+
+
+MCCompletePathStopDangling:
+Time taken: 61.0
+3.3355942744134186E-8	4.228915404400097E-14
+
+
+MCCompletePathStopDanglingRandomStart:
+Time taken: 99.33333333333333
+2.9482354078152434E-8	4.21011545910683E-9
+
+
+For n=2422100
+
+
+MCRandomStart:
+Time taken: 2889.0
+2.6408181402927633E-8	2.9473846278305827E-9
+
+
+MCCyclicStart:
+Time taken: 2541.3333333333335
+1.2653518215502502E-8	8.941615457909005E-10
+
+
+MCCompletePath:
+Time taken: 2572.0
+3.143448987152606E-9	1.1123185621231497E-10
+
+
+MCCompletePathStopDangling:
+Time taken: 485.6666666666667
+8.131878481951795E-9	4.4928252343481825E-15
+
+
+MCCompletePathStopDanglingRandomStart:
+Time taken: 869.6666666666666
+2.9101857996547416E-9	5.206699030173794E-10
+
+
+For n=24221000
+
+
+MCRandomStart:
+Time taken: 29341.666666666668
+5.363259015771161E-9	3.2485004508561305E-10
+
+
+MCCyclicStart:
+Time taken: 25545.0
+1.4020075932738802E-9	9.744299873805307E-11
+
+
+MCCompletePath:
+Time taken: 24768.333333333332
+8.120349303282483E-10	1.1955222578198193E-11
+
+
+MCCompletePathStopDangling:
+Time taken: 3929.0
+7.423577480723978E-10	1.076940364872021E-17
+
+
+MCCompletePathStopDanglingRandomStart:
+Time taken: 6637.0
+7.634818096404366E-10	5.558608810843115E-11
+
+
+For n=242210000
+
+
+MCRandomStart:
+Time taken: 257819.33333333334
+1.66260881582916E-9	3.2669054970002424E-11
+
+
+MCCyclicStart:
+Time taken: 243236.66666666666
+5.144519224292552E-10	1.0532103182103846E-11
+
+
+MCCompletePath:
+Time taken: 730515.6666666666
+4.978422499249381E-10	1.2225380927757233E-12
+
+
+MCCompletePathStopDangling:
+Time taken: 37706.0
+5.466717270340942E-10	2.3345697987834853E-16
+
+
+MCCompletePathStopDanglingRandomStart:
+Time taken: 63254.666666666664
+5.486808635291399E-10	5.223508523063271E-12

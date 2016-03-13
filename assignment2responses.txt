@@ -19,6 +19,13 @@ Why	are	these	documents ranked	highly?	Be	prepared	to	explain	this	using	pen	and
 		1. JasonRifkind is a very short document, with the word zombie twice, so its dividend is much smaller than for other queries, and it contains an infrequent query words twice.
 		2. Zombie_Walk is again relatively short, and contains zombie many times, and attack once. 
 		3. Kearney_Hall is also short, and contains both zombie and attack twice.
+		4. Measure_Z.f is short-intermediate, contains zombie once, attack twice.
+		5. Spirit_Halloween.f is short-intermediate, longer than Measure_Z and contains 2 zombies, 1 attack
+		6. EmilyMaas.f is shorter than the previous 2, but contains only zombibe once
+		7. AliciaEdelman.f is longer than the previous 1, but also contains only zombie once
+		8.TheWarrior.f is short but contains attack only once.
+		9. Scream.f contains zombie twice and attack once, but is much longer than the previous
+		10. Zombies_Reclaim_the_Streets.f is very long, but with many occurences of Zombie, so it gets diluted.
 
 	2. --money transfer--
 
@@ -27,12 +34,24 @@ Why	are	these	documents ranked	highly?	Be	prepared	to	explain	this	using	pen	and
 		1. MattLM contains the more weighted word transfer twice and is very short.
 		2. Angelique_Tarazi contains the more weighted word transfer twice and is very short, but slightly longer than MattLM, otherwise would be equivalent.
 		3. JordanJohnson contains the more weighted word transfer twice and is very short, but slightly longer than Angelique_Tarazi.
+		4.NicoleBush.f is very short, but only contains transfer once
+		5.Title_Companies.f is short, but longer than the previous with the same one occurrence of transfer
+		6.Anthony_Swofford.f is short, but longer than the previous 2, but has twice the occurrences of transfer, but the length makes it ranked lower.
+		7.Transfer_Student_Association.f contains transfer 3x, but is even longer than the previous
+		8.Munch_Money.f is short-intermediate, but with many occurences of the less weighted term money.
+		9.money.f has 8 occs of money, but has a very long length and no occurences of the much more weighted term transfer.
+		10.NinadelRosario.f is very short, but not among the shortest documents, whose one occurrence of transfer is beated by the previous 8 occs of money.
 
 
 
 Discuss	 how	 variations	 in	 tf	
 representation	 (such	 as	 log(1+tf)) and	 document	 length	 representation	 (such	 as	
 Euclidean	length,	or	sqrt(#words)) affect the	cosine	similarity	measure.
+
+idf = log(N/df) = # of documents in corpus w term, N is total # of documents
+tf = # of occurrences in the document
+
+tf-idf = tf*idf / len(doc)
 
 Variations in tf representation
 	As discussed in the text and lecture, "a document that contains a word 10x more times is not 10x more relevant," so we may want to change our scaling with the number of documents. Using the log(1+tf) scaling factor instead of just tf accounts for the decrease of the importance in mentions as mentions increase. In many longer, more in-depth discussions, synonyms may be used as well, which further adds to the lack of importance of terms. The additional 1 makes sure you never have a log(0).
@@ -79,11 +98,11 @@ Having a phrase or intersection query that's unranked will eliminate many more d
 This is where the ranked retrieval will shine, returning many more documents, but sacrificing precision for reasons related to document length and occurrence of one word many times perhaps outshadowing documents with all of the words.
 
 PowerIteration...
-1. 121, 0.00798127257317499
-2. 21, 0.007731570382243691
-3. 245, 0.007360200557250774
-4. 1531, 0.005094248846795316
-5. 1367, 0.002836810239023361
+1. 121, 0.00798127257317499 // Davis
+2. 21, 0.007731570382243691 // Photo_Request
+3. 245, 0.007360200557250774 // UC_Davis
+4. 1531, 0.005094248846795316 // Seed/Definition
+5. 1367, 0.002836810239023361 // departed_businesses
 6. 31, 0.0025371174990797534
 7. 80, 0.002216418040553719
 8. 1040, 0.0021826066444895218
@@ -193,6 +212,85 @@ The random ones do not reach all of the documents for small N, so the bottom 50 
 This is because the Monte Carlo methods assert chance, and as we have discussed, the uncommon possibilities are much more likely to be underestimated than overestimated, so the top values are much more accurately and quickly assessed as they get hit so many more times. The top is overrepresented.
 
 The deterministic method however continues to distribute the probability completely accurately, even the smallest probabilities are accurately maintained, so across values you will see no obvious under estimation for the lowest links, rather you see accuracy increasing across all values. Eventually the "chance" based MC methods will converge just due to statistics.
+
+
+What	is	 the	 effect	 of	letting	 the	 tf-idf	 score	 dominate this ranking?	What	is	 the	 effect	 of	
+letting	the	pagerank	dominate? What	would	be	a	good	strategy	for	selecting	an	”optimal”	
+combination?	(Remember	the	quality	measures	you	studied	in	Task	2.3.)
+
+Letting a tf-idf score focuses on the matching of query words and their attributes across the corpus with respect to frequency as a proxy of discerning potential. Pagerank adds an additional layer of discernment where we can consider authority, or hubs that have a high rank independent of query words. This will allow us to better separate out relevant pages that merely "cheat" the system of tf-idf scores, really short documents that contain just a few, obscure words including the desired ones. An example would the graduate students, who would no longer have as high of a rank.
+
+With 50-50 weighting for the query "graduate program mathematics":
+
+Found 2163 matching document(s)
+
+ 0. src\resources\davisWiki\Math.f   0.50233
+ 1. src\resources\davisWiki\Davis.f   0.50084
+ 2. src\resources\davisWiki\UC_Davis.f   0.46147
+ 3. src\resources\davisWiki\Grad_Students.f   0.21005
+ 4. src\resources\davisWiki\TravisTaylor.f   0.20131
+ 5. src\resources\davisWiki\The_Grad.f   0.19911
+ 6. src\resources\davisWiki\Davis_Graduate.f   0.19846
+ 7. src\resources\davisWiki\Sacramento.f   0.15927
+ 8. src\resources\davisWiki\GRE.f   0.14933
+ 9. src\resources\davisWiki\ASUCD.f   0.13904
+ 10. src\resources\davisWiki\JulieB.f   0.13225
+
+ Which is an improvement with less obscure results. Honestly, the hub pages are very relevant for understanding the scope of the problem. UC_DAVIS is very general, but it explains about a potential graduate program, if you didn't even know the university was in the area, for example.
+
+With 30-70 (idf = 70):
+
+Found 2163 matching document(s)
+
+ 0. src\resources\davisWiki\Math.f   0.70140
+ 1. src\resources\davisWiki\Davis.f   0.30117
+ 2. src\resources\davisWiki\Grad_Students.f   0.28316
+ 3. src\resources\davisWiki\TravisTaylor.f   0.28079
+ 4. src\resources\davisWiki\UC_Davis.f   0.27719
+ 5. src\resources\davisWiki\The_Grad.f   0.27660
+ 6. src\resources\davisWiki\Davis_Graduate.f   0.27621
+ 7. src\resources\davisWiki\GRE.f   0.20745
+ 8. src\resources\davisWiki\JulieB.f   0.18410
+ 9. src\resources\davisWiki\EOP.f   0.17877
+ 10. src\resources\davisWiki\Mentorships_for_Undergraduate_Research_in_Agriculture%2C_Letters%2C_and_Science.f   0.17809
+
+ Math notably remained the same, but TravisTaylor moved down, a good result. UC_Davis was retained, which is another positive result. Sacremento was filtered out, as well.
+
+With 30-70 (pagerank = 70):
+
+Found 2163 matching document(s)
+
+ 0. src\resources\davisWiki\Davis.f   0.70050
+ 1. src\resources\davisWiki\UC_Davis.f   0.64576
+ 2. src\resources\davisWiki\Math.f   0.30326
+ 3. src\resources\davisWiki\Sacramento.f   0.22272
+ 4. src\resources\davisWiki\ASUCD.f   0.19451
+ 5. src\resources\davisWiki\Grad_Students.f   0.13694
+ 6. src\resources\davisWiki\TravisTaylor.f   0.12183
+ 7. src\resources\davisWiki\The_Grad.f   0.12163
+ 8. src\resources\davisWiki\Davis_Graduate.f   0.12071
+ 9. src\resources\davisWiki\Campus.f   0.10827
+ 10. src\resources\davisWiki\GRE.f   0.09122
+
+ Math moved down, which is a huge mark against this weighting. Sacremento was moved up, much too far, and more relevant results were pushed down, so this is a large worsening.
+
+With 10-90 (idf = 90):
+
+Found 2163 matching document(s)
+
+ 0. src\resources\davisWiki\Math.f   0.90047
+ 1. src\resources\davisWiki\TravisTaylor.f   0.36026
+ 2. src\resources\davisWiki\Grad_Students.f   0.35627
+ 3. src\resources\davisWiki\The_Grad.f   0.35408
+ 4. src\resources\davisWiki\Davis_Graduate.f   0.35395
+ 5. src\resources\davisWiki\GRE.f   0.26556
+ 6. src\resources\davisWiki\JulieB.f   0.23596
+ 7. src\resources\davisWiki\EOP.f   0.22845
+ 8. src\resources\davisWiki\Mentorships_for_Undergraduate_Research_in_Agriculture%2C_Letters%2C_and_Science.f   0.22822
+ 9. src\resources\davisWiki\Wilfred.f   0.19310
+ 10. src\resources\davisWiki\Planned_Education_Leave_Program.f   0.18263
+
+ We lost UC_Davis, which is a relevant result, and we want TravisTaylor to be moved down. From this case study, I would suggest 70% tf-idf, 30% pagerank.
 
 Reading file... done. Read 24221 number of documents
 PowerIteration...
@@ -339,6 +437,30 @@ Time taken: 6637.0
 7.634818096404366E-10	5.558608810843115E-11
 
 
+For n=242210000
 
 
+MCRandomStart:
+Time taken: 257819.33333333334
+1.66260881582916E-9	3.2669054970002424E-11
+
+
+MCCyclicStart:
+Time taken: 243236.66666666666
+5.144519224292552E-10	1.0532103182103846E-11
+
+
+MCCompletePath:
+Time taken: 730515.6666666666
+4.978422499249381E-10	1.2225380927757233E-12
+
+
+MCCompletePathStopDangling:
+Time taken: 37706.0
+5.466717270340942E-10	2.3345697987834853E-16
+
+
+MCCompletePathStopDanglingRandomStart:
+Time taken: 63254.666666666664
+5.486808635291399E-10	5.223508523063271E-12
 

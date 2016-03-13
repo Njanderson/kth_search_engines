@@ -75,9 +75,6 @@ public class PostingsList implements Serializable {
     	return new PostingsList((HashMap<Integer, PostingsEntry>)docIDtoPostings.clone());
     }
     
-    //
-    //  YOUR CODE HERE
-    //
 }
 	
 

@@ -11,7 +11,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -84,28 +83,16 @@ public class PageRank {
 	 */
 	final static int MAX_NUMBER_OF_ITERATIONS = 1000;
 
-	/* --------------------------------------------- */
-
+	/* --------------------------------------------- */	
+	
+	private Map<Integer, PageRankTuple> trueValueMap;
+	
 	public PageRank(String filename) {
 		int noOfDocs = readDocs(filename);
-		int[] nValues = {
-//			noOfDocs/2,
-//		    noOfDocs,
-//		    noOfDocs*2,
-//		    noOfDocs*10,
-//		    noOfDocs*100,
-//		    noOfDocs*1000,
-		    noOfDocs*10000
-		};
-
-		int numTrials = 3;
-		int numberToPrint = 50;
 		PageRankTupleComparatorDec decComparator = new PageRankTupleComparatorDec();
-		PriorityQueue<PageRankTuple> decQueue = new PriorityQueue<PageRankTuple>(decComparator);
 		PageRankTupleComparatorInc incComparator = new PageRankTupleComparatorInc();
-		PriorityQueue<PageRankTuple> incQueue = new PriorityQueue<PageRankTuple>(incComparator);
 		
-		System.out.println("PowerIteration...");
+		System.out.println("Computing Page Rank...");
 		PriorityQueue<PageRankTuple> trueValueDecQueue = new PriorityQueue<PageRankTuple>(decComparator);
 		PriorityQueue<PageRankTuple> trueValueIncQueue = new PriorityQueue<PageRankTuple>(incComparator);
 		Set<PageRankTuple> trueValue = computePagerankPowerIteration(noOfDocs);
@@ -113,179 +100,18 @@ public class PageRank {
 		trueValueDecQueue.addAll(trueValue);
 		trueValueIncQueue.clear();
 		trueValueIncQueue.addAll(trueValue);
-		printTopResults(trueValueDecQueue, numberToPrint);
-		System.out.println("Complete");
-		
-//		boolean hasConverged = false;
-//		int n = 24221;
-//		while (!hasConverged) {
-//			hasConverged = true;
-//			System.out.println("N=" + n);
-//			
-////			System.out.println("mcRandomStart");
-//			Set<PageRankTuple> mcRandomStart = computePagerankMCRandomStart(noOfDocs, n);
-//			Map<Integer, PageRankTuple> mcRandomStartMap = new HashMap<Integer, PageRankTuple>();
-//			for (PageRankTuple tuple: mcRandomStart) {
-//				mcRandomStartMap.put(tuple.docId, tuple);
-//			}
-//			decQueue.clear();
-//			decQueue.addAll(mcRandomStart);
-//			boolean localConverge = hasCovergedCompareDocs(trueValueDecQueue, mcRandomStartMap, 50);
-//			if (localConverge) {
-//				System.out.println("mcRandomStart converged at n=" + n);
-//			}
-//			hasConverged = localConverge & hasConverged;
-////			System.out.println("mcCyclicStart");
-//			// recompute to more accurately assess n
-//			Set<PageRankTuple> mcCyclicStart = computePagerankMCCyclicStart(noOfDocs, n/noOfDocs);
-//			Map<Integer, PageRankTuple> mcCyclicStartMap = new HashMap<Integer, PageRankTuple>();
-//			for (PageRankTuple tuple: mcCyclicStart) {
-//				mcCyclicStartMap.put(tuple.docId, tuple);
-//			}
-//			decQueue.clear();
-//			decQueue.addAll(mcCyclicStart);
-//			localConverge = hasCovergedCompareDocs(trueValueDecQueue, mcCyclicStartMap, 50);
-//			if (localConverge) {
-//				System.out.println("mcCyclicStart converged at n=" + n);
-//			}
-//			hasConverged = localConverge & hasConverged;
-////			System.out.println("mcCompletePath");
-//			// recompute to more accurately assess n
-//			Set<PageRankTuple> mcCompletePath = computePagerankMCCompletePath(noOfDocs, n/noOfDocs);
-//			Map<Integer, PageRankTuple> mcCompletePathMap = new HashMap<Integer, PageRankTuple>();
-//			for (PageRankTuple tuple: mcCompletePath) {
-//				mcCompletePathMap.put(tuple.docId, tuple);
-//			}
-//			decQueue.clear();
-//			decQueue.addAll(mcCompletePath);
-//			localConverge = hasCovergedCompareDocs(trueValueDecQueue, mcCompletePathMap, 50);
-//			if (localConverge) {
-//				System.out.println("mcCompletePath converged at n=" + n);
-//			}
-//			hasConverged = localConverge & hasConverged;
-////			System.out.println("mcCompletePathStopDangling");
-//			// recompute to more accurately assess n
-//			Set<PageRankTuple> mcCompletePathStopDangling = computePagerankMCCompletePathStopDangling(noOfDocs, n/noOfDocs);
-//			Map<Integer, PageRankTuple> mcCompletePathStopDanglingMap = new HashMap<Integer, PageRankTuple>();
-//			for (PageRankTuple tuple: mcCompletePathStopDangling) {
-//				mcCompletePathStopDanglingMap.put(tuple.docId, tuple);
-//			}
-//			decQueue.clear();
-//			decQueue.addAll(mcCompletePathStopDangling);
-//			localConverge = hasCovergedCompareDocs(trueValueDecQueue, mcCompletePathStopDanglingMap, 50);
-//			if (localConverge) {
-//				System.out.println("mcCompletePathStopDangling converged at n=" + n);
-//			}
-//			hasConverged = localConverge & hasConverged;
-////			System.out.println("mcCompletePathStopDanglingRandomStart");
-//			Set<PageRankTuple> mcCompletePathStopDanglingRandomStart = computePagerankMCCompletePathRandomStart(noOfDocs, n);
-//			Map<Integer, PageRankTuple> mcCompletePathStopDanglingRandomStartMap = new HashMap<Integer, PageRankTuple>();
-//			for (PageRankTuple tuple: mcCompletePathStopDanglingRandomStart) {
-//				mcCompletePathStopDanglingRandomStartMap.put(tuple.docId, tuple);
-//			}
-//			decQueue.clear();
-//			decQueue.addAll(mcCompletePathStopDanglingRandomStart);
-//			localConverge = hasCovergedCompareDocs(trueValueDecQueue, mcCompletePathStopDanglingRandomStartMap, 50);
-//			if (localConverge) {
-//				System.out.println("mcCompletePathStopDanglingRandomStart converged at n=" + n);
-//			}
-//			hasConverged = localConverge & hasConverged;
-//			n+=24221;
-//		}
-		
-		for (int i = 0; i < nValues.length; i++) {
-			int n = nValues[i];
-			System.out.println("\n\nFor n=" + n);
-			double sqrDiffTop = 0.0;
-			double sqrDiffBot = 0.0;
-			double startTime = System.currentTimeMillis();
-			System.out.println("\n\nMCRandomStart:");
-			for (int trial = 0; trial < numTrials; trial++) {
-				Set<PageRankTuple> mcRandomStart = computePagerankMCRandomStart(noOfDocs, n);
-				decQueue.clear();
-				decQueue.addAll(mcRandomStart);
-				sqrDiffTop += computeSumOfSqrDiff(trueValueDecQueue, decQueue, 50);
-				incQueue.clear();
-				incQueue.addAll(mcRandomStart);
-				sqrDiffBot += computeSumOfSqrDiff(trueValueIncQueue, incQueue, 50);
-				printTopResults(decQueue, numberToPrint);
-			}
-			double endTime = System.currentTimeMillis();
-			System.out.println("Time taken: " + (endTime-startTime)/numTrials);
-			System.out.print(sqrDiffTop/numTrials + "\t");
-			System.out.println(sqrDiffBot/numTrials);
-			startTime = System.currentTimeMillis();
-			System.out.println("\n\nMCCyclicStart:");
-			for (int trial = 0; trial < numTrials; trial++) {
-				Set<PageRankTuple> mcCyclicStart = computePagerankMCCyclicStart(noOfDocs, n/noOfDocs);
-				decQueue.clear();
-				decQueue.addAll(mcCyclicStart);
-				sqrDiffTop = computeSumOfSqrDiff(trueValueDecQueue, decQueue, 50);
-				incQueue.clear();
-				incQueue.addAll(mcCyclicStart);
-				sqrDiffBot = computeSumOfSqrDiff(trueValueIncQueue, incQueue, 50);
-				printTopResults(decQueue, numberToPrint);
-			}
-			endTime = System.currentTimeMillis();
-			System.out.println("Time taken: " + (endTime-startTime)/numTrials);
-			System.out.print(sqrDiffTop/numTrials + "\t");
-			System.out.println(sqrDiffBot/numTrials);
-			
-			startTime = System.currentTimeMillis();
-			System.out.println("\n\nMCCompletePath:");
-			for (int trial = 0; trial < numTrials; trial++) {
-				Set<PageRankTuple> mcCompletePath = computePagerankMCCompletePath(noOfDocs, n/noOfDocs);
-				decQueue.clear();
-				decQueue.addAll(mcCompletePath);
-				sqrDiffTop = computeSumOfSqrDiff(trueValueDecQueue, decQueue, 50);
-				incQueue.clear();
-				incQueue.addAll(mcCompletePath);
-				sqrDiffBot = computeSumOfSqrDiff(trueValueIncQueue, incQueue, 50);
-				printTopResults(decQueue, numberToPrint);
-			}
-			endTime = System.currentTimeMillis();
-			System.out.println("Time taken: " + (endTime-startTime)/numTrials);
-			System.out.print(sqrDiffTop/numTrials + "\t");
-			System.out.println(sqrDiffBot/numTrials);
-			
-			startTime = System.currentTimeMillis();
-			System.out.println("\n\nMCCompletePathStopDangling:");
-			for (int trial = 0; trial < numTrials; trial++) {
-				Set<PageRankTuple> mcCompletePathStopDangling = computePagerankMCCompletePathStopDangling(noOfDocs, n/noOfDocs);
-				decQueue.clear();
-				decQueue.addAll(mcCompletePathStopDangling);
-				sqrDiffTop = computeSumOfSqrDiff(trueValueDecQueue, decQueue, 50);
-				incQueue.clear();
-				incQueue.addAll(mcCompletePathStopDangling);
-				sqrDiffBot = computeSumOfSqrDiff(trueValueIncQueue, incQueue, 50);
-				printTopResults(decQueue, numberToPrint);
-			}
-			endTime = System.currentTimeMillis();
-			System.out.println("Time taken: " + (endTime-startTime)/numTrials);
-			System.out.print(sqrDiffTop/numTrials + "\t");
-			System.out.println(sqrDiffBot/numTrials);
-			
-			startTime = System.currentTimeMillis();
-			System.out.println("\n\nMCCompletePathStopDanglingRandomStart:");
-			for (int trial = 0; trial < numTrials; trial++) {
-				Set<PageRankTuple> mcCompletePathStopDanglingRandomStart = computePagerankMCCompletePathRandomStart(noOfDocs, n);
-				decQueue.clear();
-				decQueue.addAll(mcCompletePathStopDanglingRandomStart);
-				sqrDiffTop = computeSumOfSqrDiff(trueValueDecQueue, decQueue, 50);
-				incQueue.clear();
-				incQueue.addAll(mcCompletePathStopDanglingRandomStart);
-				sqrDiffBot = computeSumOfSqrDiff(trueValueIncQueue, incQueue, 50);
-				printTopResults(decQueue, numberToPrint);
-			}
-			endTime = System.currentTimeMillis();
-			System.out.println("Time taken: " + (endTime-startTime)/numTrials);
-			System.out.print(sqrDiffTop/numTrials + "\t");
-			System.out.println(sqrDiffBot/numTrials);
+		for (PageRankTuple val: trueValue) {
+			trueValueMap.put(val.docId, val);
 		}
+		System.out.println("Page Rank Calculation Complete!");
 	}
 	
-
-	
+	/*
+	 * Modifies the state of the PageRank, so do not change the PageRankTuples!
+	 */
+	public Map<Integer, PageRankTuple> getPageRankMap() {
+		return trueValueMap;
+	}
 	
 	/* --------------------------------------------- */
 
@@ -681,11 +507,211 @@ public class PageRank {
 
 	/* --------------------------------------------- */
 
-	public static void main(String[] args) {
-		if (args.length != 1) {
-			System.err.println("Please give the name of the link file");
-		} else {
-			new PageRank(args[0]);
+//	public static void main(String[] args) {
+//		if (args.length != 1) {
+//			System.err.println("Please give the name of the link file");
+//		} else {
+//			new PageRank(args[0]);
+//		}
+//	}
+	
+	public void performExperiments(String filename) {
+		int noOfDocs = readDocs(filename);
+		int[] nValues = {
+//			noOfDocs/2,
+		    noOfDocs,
+		    noOfDocs*2,
+		    noOfDocs*10,
+		    noOfDocs*100,
+		    noOfDocs*1000,
+		    noOfDocs*10000
+		};
+
+		int numTrials = 3;
+		int numberToPrint = 50;
+		PageRankTupleComparatorDec decComparator = new PageRankTupleComparatorDec();
+		PriorityQueue<PageRankTuple> decQueue = new PriorityQueue<PageRankTuple>(decComparator);
+		PageRankTupleComparatorInc incComparator = new PageRankTupleComparatorInc();
+		PriorityQueue<PageRankTuple> incQueue = new PriorityQueue<PageRankTuple>(incComparator);
+		
+		System.out.println("PowerIteration...");
+		PriorityQueue<PageRankTuple> trueValueDecQueue = new PriorityQueue<PageRankTuple>(decComparator);
+		PriorityQueue<PageRankTuple> trueValueIncQueue = new PriorityQueue<PageRankTuple>(incComparator);
+		Set<PageRankTuple> trueValue = computePagerankPowerIteration(noOfDocs);
+		trueValueDecQueue.clear();
+		trueValueDecQueue.addAll(trueValue);
+		trueValueIncQueue.clear();
+		trueValueIncQueue.addAll(trueValue);
+		printTopResults(trueValueDecQueue, numberToPrint);
+		System.out.println("Complete");
+		
+//		boolean hasConverged = false;
+//		int n = 24221;
+//		while (!hasConverged) {
+//			hasConverged = true;
+//			System.out.println("N=" + n);
+//			
+////			System.out.println("mcRandomStart");
+//			Set<PageRankTuple> mcRandomStart = computePagerankMCRandomStart(noOfDocs, n);
+//			Map<Integer, PageRankTuple> mcRandomStartMap = new HashMap<Integer, PageRankTuple>();
+//			for (PageRankTuple tuple: mcRandomStart) {
+//				mcRandomStartMap.put(tuple.docId, tuple);
+//			}
+//			decQueue.clear();
+//			decQueue.addAll(mcRandomStart);
+//			boolean localConverge = hasCovergedCompareDocs(trueValueDecQueue, mcRandomStartMap, 50);
+//			if (localConverge) {
+//				System.out.println("mcRandomStart converged at n=" + n);
+//			}
+//			hasConverged = localConverge & hasConverged;
+////			System.out.println("mcCyclicStart");
+//			// recompute to more accurately assess n
+//			Set<PageRankTuple> mcCyclicStart = computePagerankMCCyclicStart(noOfDocs, n/noOfDocs);
+//			Map<Integer, PageRankTuple> mcCyclicStartMap = new HashMap<Integer, PageRankTuple>();
+//			for (PageRankTuple tuple: mcCyclicStart) {
+//				mcCyclicStartMap.put(tuple.docId, tuple);
+//			}
+//			decQueue.clear();
+//			decQueue.addAll(mcCyclicStart);
+//			localConverge = hasCovergedCompareDocs(trueValueDecQueue, mcCyclicStartMap, 50);
+//			if (localConverge) {
+//				System.out.println("mcCyclicStart converged at n=" + n);
+//			}
+//			hasConverged = localConverge & hasConverged;
+////			System.out.println("mcCompletePath");
+//			// recompute to more accurately assess n
+//			Set<PageRankTuple> mcCompletePath = computePagerankMCCompletePath(noOfDocs, n/noOfDocs);
+//			Map<Integer, PageRankTuple> mcCompletePathMap = new HashMap<Integer, PageRankTuple>();
+//			for (PageRankTuple tuple: mcCompletePath) {
+//				mcCompletePathMap.put(tuple.docId, tuple);
+//			}
+//			decQueue.clear();
+//			decQueue.addAll(mcCompletePath);
+//			localConverge = hasCovergedCompareDocs(trueValueDecQueue, mcCompletePathMap, 50);
+//			if (localConverge) {
+//				System.out.println("mcCompletePath converged at n=" + n);
+//			}
+//			hasConverged = localConverge & hasConverged;
+////			System.out.println("mcCompletePathStopDangling");
+//			// recompute to more accurately assess n
+//			Set<PageRankTuple> mcCompletePathStopDangling = computePagerankMCCompletePathStopDangling(noOfDocs, n/noOfDocs);
+//			Map<Integer, PageRankTuple> mcCompletePathStopDanglingMap = new HashMap<Integer, PageRankTuple>();
+//			for (PageRankTuple tuple: mcCompletePathStopDangling) {
+//				mcCompletePathStopDanglingMap.put(tuple.docId, tuple);
+//			}
+//			decQueue.clear();
+//			decQueue.addAll(mcCompletePathStopDangling);
+//			localConverge = hasCovergedCompareDocs(trueValueDecQueue, mcCompletePathStopDanglingMap, 50);
+//			if (localConverge) {
+//				System.out.println("mcCompletePathStopDangling converged at n=" + n);
+//			}
+//			hasConverged = localConverge & hasConverged;
+////			System.out.println("mcCompletePathStopDanglingRandomStart");
+//			Set<PageRankTuple> mcCompletePathStopDanglingRandomStart = computePagerankMCCompletePathRandomStart(noOfDocs, n);
+//			Map<Integer, PageRankTuple> mcCompletePathStopDanglingRandomStartMap = new HashMap<Integer, PageRankTuple>();
+//			for (PageRankTuple tuple: mcCompletePathStopDanglingRandomStart) {
+//				mcCompletePathStopDanglingRandomStartMap.put(tuple.docId, tuple);
+//			}
+//			decQueue.clear();
+//			decQueue.addAll(mcCompletePathStopDanglingRandomStart);
+//			localConverge = hasCovergedCompareDocs(trueValueDecQueue, mcCompletePathStopDanglingRandomStartMap, 50);
+//			if (localConverge) {
+//				System.out.println("mcCompletePathStopDanglingRandomStart converged at n=" + n);
+//			}
+//			hasConverged = localConverge & hasConverged;
+//			n+=24221;
+//		}
+		
+		for (int i = 0; i < nValues.length; i++) {
+			int n = nValues[i];
+			System.out.println("\n\nFor n=" + n);
+			double sqrDiffTop = 0.0;
+			double sqrDiffBot = 0.0;
+			double startTime = System.currentTimeMillis();
+			System.out.println("\n\nMCRandomStart:");
+			for (int trial = 0; trial < numTrials; trial++) {
+				Set<PageRankTuple> mcRandomStart = computePagerankMCRandomStart(noOfDocs, n);
+				decQueue.clear();
+				decQueue.addAll(mcRandomStart);
+				sqrDiffTop += computeSumOfSqrDiff(trueValueDecQueue, decQueue, 50);
+				incQueue.clear();
+				incQueue.addAll(mcRandomStart);
+				sqrDiffBot += computeSumOfSqrDiff(trueValueIncQueue, incQueue, 50);
+				printTopResults(decQueue, numberToPrint);
+			}
+			double endTime = System.currentTimeMillis();
+			System.out.println("Time taken: " + (endTime-startTime)/numTrials);
+			System.out.print(sqrDiffTop/numTrials + "\t");
+			System.out.println(sqrDiffBot/numTrials);
+			startTime = System.currentTimeMillis();
+			System.out.println("\n\nMCCyclicStart:");
+			for (int trial = 0; trial < numTrials; trial++) {
+				Set<PageRankTuple> mcCyclicStart = computePagerankMCCyclicStart(noOfDocs, n/noOfDocs);
+				decQueue.clear();
+				decQueue.addAll(mcCyclicStart);
+				sqrDiffTop = computeSumOfSqrDiff(trueValueDecQueue, decQueue, 50);
+				incQueue.clear();
+				incQueue.addAll(mcCyclicStart);
+				sqrDiffBot = computeSumOfSqrDiff(trueValueIncQueue, incQueue, 50);
+				printTopResults(decQueue, numberToPrint);
+			}
+			endTime = System.currentTimeMillis();
+			System.out.println("Time taken: " + (endTime-startTime)/numTrials);
+			System.out.print(sqrDiffTop/numTrials + "\t");
+			System.out.println(sqrDiffBot/numTrials);
+			
+			startTime = System.currentTimeMillis();
+			System.out.println("\n\nMCCompletePath:");
+			for (int trial = 0; trial < numTrials; trial++) {
+				Set<PageRankTuple> mcCompletePath = computePagerankMCCompletePath(noOfDocs, n/noOfDocs);
+				decQueue.clear();
+				decQueue.addAll(mcCompletePath);
+				sqrDiffTop = computeSumOfSqrDiff(trueValueDecQueue, decQueue, 50);
+				incQueue.clear();
+				incQueue.addAll(mcCompletePath);
+				sqrDiffBot = computeSumOfSqrDiff(trueValueIncQueue, incQueue, 50);
+				printTopResults(decQueue, numberToPrint);
+			}
+			endTime = System.currentTimeMillis();
+			System.out.println("Time taken: " + (endTime-startTime)/numTrials);
+			System.out.print(sqrDiffTop/numTrials + "\t");
+			System.out.println(sqrDiffBot/numTrials);
+			
+			startTime = System.currentTimeMillis();
+			System.out.println("\n\nMCCompletePathStopDangling:");
+			for (int trial = 0; trial < numTrials; trial++) {
+				Set<PageRankTuple> mcCompletePathStopDangling = computePagerankMCCompletePathStopDangling(noOfDocs, n/noOfDocs);
+				decQueue.clear();
+				decQueue.addAll(mcCompletePathStopDangling);
+				sqrDiffTop = computeSumOfSqrDiff(trueValueDecQueue, decQueue, 50);
+				incQueue.clear();
+				incQueue.addAll(mcCompletePathStopDangling);
+				sqrDiffBot = computeSumOfSqrDiff(trueValueIncQueue, incQueue, 50);
+				printTopResults(decQueue, numberToPrint);
+			}
+			endTime = System.currentTimeMillis();
+			System.out.println("Time taken: " + (endTime-startTime)/numTrials);
+			System.out.print(sqrDiffTop/numTrials + "\t");
+			System.out.println(sqrDiffBot/numTrials);
+			
+			startTime = System.currentTimeMillis();
+			System.out.println("\n\nMCCompletePathStopDanglingRandomStart:");
+			for (int trial = 0; trial < numTrials; trial++) {
+				Set<PageRankTuple> mcCompletePathStopDanglingRandomStart = computePagerankMCCompletePathRandomStart(noOfDocs, n);
+				decQueue.clear();
+				decQueue.addAll(mcCompletePathStopDanglingRandomStart);
+				sqrDiffTop = computeSumOfSqrDiff(trueValueDecQueue, decQueue, 50);
+				incQueue.clear();
+				incQueue.addAll(mcCompletePathStopDanglingRandomStart);
+				sqrDiffBot = computeSumOfSqrDiff(trueValueIncQueue, incQueue, 50);
+				printTopResults(decQueue, numberToPrint);
+			}
+			endTime = System.currentTimeMillis();
+			System.out.println("Time taken: " + (endTime-startTime)/numTrials);
+			System.out.print(sqrDiffTop/numTrials + "\t");
+			System.out.println(sqrDiffBot/numTrials);
 		}
 	}
+	
+	
 }
